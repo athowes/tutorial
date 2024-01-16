@@ -9,6 +9,6 @@ Linking to vignette or quick-start resources where possible:
 * Plotting in python is limited, stick to R
   * `Seaborn` and `altair` are okay
   * Could learn [Observable `plot`](https://observablehq.com/)
-* `bambi` as a `brms` interface; `PyMC`, `NumPyro` or `cmdstanpy` for writing Bayesian models; `Scikit-Learn` for ML; `Jax` or `PyTorch` over `Tensorflow for NNs
+* `bambi` as a `brms` interface; `PyMC`, `NumPyro` or `cmdstanpy` for writing Bayesian models; `Scikit-Learn` for ML; `Jax` or `PyTorch` over `Tensorflow` for NNs
 * Should also start managing R packages, can do both python [and R](https://astrobiomike.github.io/R/managing-r-and-rstudio-with-conda) using `conda`
 * `hatch` for packaging, see [comparison](https://alpopkes.com/posts/python/packaging_tools/); [`pixi`](https://github.com/prefix-dev/pixi) may be allow for more cross-language management

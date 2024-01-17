@@ -4,4 +4,5 @@
 install.packages("reticulate")
 library(reticulate)
 reticulate::py_config()
+reticulate::py_list_packages()
 sessionInfo()

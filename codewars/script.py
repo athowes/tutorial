@@ -14,3 +14,15 @@ def solution(number):
     both = np.arange(start = 0, stop = 3 * 5 * num_both + 1, step = 3 * 5)
     
     return(sum(threes) + sum(fives) - sum(both))
+
+# Credit card mask
+
+def maskify(cc):
+    mask = "#" * (len(cc) - 4)
+    end = cc[-4:]
+    return(mask + end)
+
+# Duplicate encoder
+
+def duplicate_encode(word):
+    

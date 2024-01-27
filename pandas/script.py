@@ -78,10 +78,3 @@ df.iloc[[1, 2, 4], [0, 2]]
 df.iloc[1:3]
 df.iloc[1:3, :] # Equivalent to the above
 df.iloc[:, 1:3]
-
-
-
-
-
-
-

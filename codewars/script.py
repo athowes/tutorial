@@ -25,4 +25,45 @@ def maskify(cc):
 # Duplicate encoder
 
 def duplicate_encode(word):
-    
+    word = str.lower(word)
+    out = ""
+    for i in range(0, len(word)):
+        if(word[i] in word[: i] + word[i + 1:]):
+          out = out + ")"
+        else:
+          out = out + "("
+    return(out)
+
+# Playing with digits
+
+def dig_pow(n, p):
+    n_str = str(n)
+    sum = 0
+    for d in n_str:
+        sum = sum + int(d)**p
+        print(sum)
+        p = p + 1
+  
+    if(sum % n == 0):
+        return sum / n
+    else:
+        return -1
+
+# Sum of two lowest positive integers
+
+def sum_two_smallest_numbers(numbers):
+    min_two = sorted(numbers)[0:2]
+    return(min_two[0] + min_two[1])
+
+# Regex validate PIN code
+
+def validate_pin(pin):
+    if(not len(pin) in [4, 6]):
+        return(False)
+    try:
+        pin_int = int(pin)
+    except ValueError:
+        return False
+    if(pin_int < 0):
+        return False
+    return(True)

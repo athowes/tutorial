@@ -67,3 +67,22 @@ def validate_pin(pin):
     if(pin_int < 0):
         return False
     return(True)
+  
+# Mumbling
+
+def accum(st):
+    out = ""
+    i = 1
+    for d in st:
+      out = out + "-" + d.upper() + d.lower() * (i - 1)
+      i = i + 1
+    return(out[1:])
+
+# Sort the odd
+
+def sort_array(source_array):
+    odd_indices = [i for i, j in enumerate(source_array) if j % 2 == 1]
+    sorted_odd = sorted([source_array[i] for i in odd_indices])
+    for i, sorted_odd in zip(odd_indices, sorted_odd):
+      source_array[i] = sorted_odd
+    return(source_array)

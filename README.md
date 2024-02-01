@@ -25,3 +25,7 @@ pip install pymc3
 ## Questions I have
 
 * What is [BLAS](https://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms)? Would be nice to understand what these subroutines are
+
+## Topics to learn more about
+
+* Advanced topics in Stan (particularly related to approaches to improve performance)

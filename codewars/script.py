@@ -86,3 +86,11 @@ def sort_array(source_array):
     for i, sorted_odd in zip(odd_indices, sorted_odd):
       source_array[i] = sorted_odd
     return(source_array)
+
+# Is this a triangle?
+
+def is_triangle(a, b, c):
+    if(a <= 0 or b <= 0 or c <= 0):
+      return False
+    sides = sorted([a, b, c])
+    return sides[0] + sides[1] > sides[2]

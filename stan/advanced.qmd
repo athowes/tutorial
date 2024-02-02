@@ -1,0 +1,17 @@
+---
+title: "Advanced Stan"
+author: "Adam Howes"
+date: "`r Sys.Date()`"
+toc: true
+number-sections: true
+format: 
+  html: 
+    code-fold: false
+    html-math-method: katex
+---
+
+# Computing environment
+
+```{r}
+sessionInfo()
+```

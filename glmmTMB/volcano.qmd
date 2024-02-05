@@ -108,8 +108,15 @@ fit_glmmtmb_priors <- glmmTMB::glmmTMB(z ~ 1 + exp(pos + 0 | group), data = df_s
 fit_glmmtmb$sdr
 fit_glmmtmb_priors$sdr
 
-# What about a prior on theta (both components?)
-# TODO
+# What about a prior on theta: how can this be done for both components?
+priors <- data.frame(
+  prior = "normal(0, 1)",
+  class = "ranef_sd",
+  coef = "pos"
+)
+
+# Doesn't work
+# fit_glmmtmb_priors <- glmmTMB::glmmTMB(z ~ 1 + exp(pos + 0 | group), data = df_sample, priors = priors)
 ```
 
 # Inference with Hamiltonian Monte Carlo via `tmbstan`

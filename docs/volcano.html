@@ -229,25 +229,32 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>fit_glmmtmb<span class="sc">$</span>sdr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>sdreport(.) result
-        Estimate Std. Error
-beta  108.409282 17.7780550
-betad   4.920909  0.2877190
-theta   3.353272  0.2706965
-theta   3.480267  0.6386422
-Maximum gradient component: 1.53018e-06 </code></pre>
+       Estimate Std. Error
+beta  97.006176 19.8124384
+betad  4.781168  0.3180085
+theta  3.396495  0.2932826
+theta  3.658218  0.6753928
+Maximum gradient component: 6.296036e-06 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fit_glmmtmb_priors<span class="sc">$</span>sdr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>sdreport(.) result
-        Estimate Std. Error
-beta  107.530495 18.3227168
-betad   4.922274  0.2872169
-theta   3.359369  0.2760318
-theta   3.496205  0.6497590
-Maximum gradient component: 1.339929e-05 </code></pre>
+       Estimate Std. Error
+beta  96.029829 20.4293165
+betad  4.782471  0.3173681
+theta  3.403443  0.2991594
+theta  3.675541  0.6871279
+Maximum gradient component: 4.485231e-06 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># What about a prior on theta (both components?)</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># What about a prior on theta: how can this be done for both components?</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>priors <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">prior =</span> <span class="st">"normal(0, 1)"</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">class =</span> <span class="st">"ranef_sd"</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">coef =</span> <span class="st">"pos"</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Doesn't work</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co"># fit_glmmtmb_priors &lt;- glmmTMB::glmmTMB(z ~ 1 + exp(pos + 0 | group), data = df_sample, priors = priors)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="inference-with-hamiltonian-monte-carlo-via-tmbstan" class="level1" data-number="4">

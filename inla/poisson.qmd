@@ -51,11 +51,12 @@ predictor_samples <- sapply(samples, function(x) x$latent[target, 1])
 lambda_samples <- exp(predictor_samples)
 
 samples_df <- data.frame(lambda_samples) |>
-  tibble::rowid_to_column("sample") |>
-  tidyr::pivot_longer(cols = starts_with("X"), names_to = "id", values_to = "value") |>
-  dplyr::mutate(id = as.numeric(sub("^X", "", id)))
+  tibble::rowid_to_column("id") |>
+  tidyr::pivot_longer(cols = starts_with("X"), names_to = "sample", values_to = "value") |>
+  dplyr::mutate(sample = as.numeric(sub("^X", "", sample)))
 
 head(samples_df)
+dim(samples_df)
 
 ggplot(samples_df, aes(x = id, y = value)) +
   geom_point() +

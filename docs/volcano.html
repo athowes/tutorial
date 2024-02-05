@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Adam Howes">
-<meta name="dcterms.date" content="2024-02-01">
+<meta name="dcterms.date" content="2024-02-05">
 
 <title>glmmTMB volcanos demonstration</title>
 <style>
@@ -70,6 +70,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="volcano_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="volcano_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
 
 </head>
 
@@ -83,8 +99,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background"><span class="header-section-number">1</span> Background</a></li>
   <li><a href="#inference-with-empirical-bayes-and-a-laplace-approximation-via-tmb" id="toc-inference-with-empirical-bayes-and-a-laplace-approximation-via-tmb" class="nav-link" data-scroll-target="#inference-with-empirical-bayes-and-a-laplace-approximation-via-tmb"><span class="header-section-number">2</span> Inference with empirical Bayes and a Laplace approximation via <code>TMB</code></a></li>
-  <li><a href="#inference-with-hamiltonian-monte-carlo-via-tmbstan" id="toc-inference-with-hamiltonian-monte-carlo-via-tmbstan" class="nav-link" data-scroll-target="#inference-with-hamiltonian-monte-carlo-via-tmbstan"><span class="header-section-number">3</span> Inference with Hamiltonian Monte Carlo via <code>tmbstan</code></a></li>
-  <li><a href="#to-do" id="toc-to-do" class="nav-link" data-scroll-target="#to-do"><span class="header-section-number">4</span> To-do</a></li>
+  <li><a href="#using-priors" id="toc-using-priors" class="nav-link" data-scroll-target="#using-priors"><span class="header-section-number">3</span> Using priors</a></li>
+  <li><a href="#inference-with-hamiltonian-monte-carlo-via-tmbstan" id="toc-inference-with-hamiltonian-monte-carlo-via-tmbstan" class="nav-link" data-scroll-target="#inference-with-hamiltonian-monte-carlo-via-tmbstan"><span class="header-section-number">4</span> Inference with Hamiltonian Monte Carlo via <code>tmbstan</code></a></li>
   <li><a href="#computing-environment" id="toc-computing-environment" class="nav-link" data-scroll-target="#computing-environment"><span class="header-section-number">5</span> Computing environment</a></li>
   </ul>
 </nav>
@@ -110,7 +126,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">February 1, 2024</p>
+      <p class="date">February 5, 2024</p>
     </div>
   </div>
   
@@ -122,110 +138,165 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="background" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Background</h1>
-<p>This demonstration is based upon the spatial covariance <a href="https://cran.r-project.org/web/packages/glmmTMB/vignettes/covstruct.html#a-spatial-covariance-example.">example</a> from the <code>glmmTMB</code> vignette.</p>
+<p>This demonstration is based upon the spatial covariance <a href="https://cran.r-project.org/web/packages/glmmTMB/vignettes/covstruct.html#a-spatial-covariance-example">example</a> from the <code>glmmTMB</code> vignette.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(glmmTMB)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tmbstan)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">rstan_options</span>(<span class="at">auto_write =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">mc.cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">rstan_options</span>(<span class="at">threads_per_chain =</span> <span class="dv">1</span>) <span class="co"># does this help with glmmTMB?</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"glmmTMB/glmmTMB/glmmTMB"</span>, <span class="at">ref =</span> <span class="st">"priors"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(glmmTMB)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tmbstan)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">rstan_options</span>(<span class="at">auto_write =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">mc.cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">rstan_options</span>(<span class="at">threads_per_chain =</span> <span class="dv">1</span>) <span class="co"># does this help with glmmTMB?</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> <span class="fu">as.vector</span>(<span class="fu">row</span>(volcano)),</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> <span class="fu">as.vector</span>(<span class="fu">col</span>(volcano)),</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">z =</span> <span class="fu">as.vector</span>(volcano) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="fu">length</span>(volcano), <span class="at">sd =</span> <span class="dv">15</span>)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># This is how the complete volcano data looks</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>complete_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">fill =</span> z)) <span class="sc">+</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>() <span class="sc">+</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>() <span class="sc">+</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Complete data"</span>) <span class="sc">+</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>df_sample <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">sample_n</span>(df, <span class="dv">100</span>)</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>partial_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df_sample, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">fill =</span> z)) <span class="sc">+</span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>() <span class="sc">+</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>() <span class="sc">+</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Sampled data"</span>) <span class="sc">+</span></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>complete_plot <span class="sc">/</span> partial_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">group =</span> <span class="fu">factor</span>(<span class="fu">rep</span>(<span class="dv">1</span>, <span class="fu">n</span>())),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">pos =</span> <span class="fu">numFactor</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co"># This is how the complete volcano data looks</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>complete_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">fill =</span> z)) <span class="sc">+</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>() <span class="sc">+</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>() <span class="sc">+</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Complete data"</span>) <span class="sc">+</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>df_sample <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">sample_n</span>(df, <span class="dv">100</span>)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>partial_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df_sample, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">fill =</span> z)) <span class="sc">+</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>() <span class="sc">+</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>() <span class="sc">+</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Sampled data"</span>) <span class="sc">+</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>complete_plot <span class="sc">/</span> partial_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="volcano_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
 </div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df_sample <span class="ot">&lt;-</span> df_sample <span class="sc">|&gt;</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">pos =</span> <span class="fu">numFactor</span>(x, y),</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">group =</span> <span class="fu">factor</span>(<span class="fu">rep</span>(<span class="dv">1</span>, <span class="fu">nrow</span>(df_sample)))</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="inference-with-empirical-bayes-and-a-laplace-approximation-via-tmb" class="level1" data-number="2">
 <h1 data-number="2"><span class="header-section-number">2</span> Inference with empirical Bayes and a Laplace approximation via <code>TMB</code></h1>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit the model using glmmTMB</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>fit_glmmtmb <span class="ot">&lt;-</span> <span class="fu">glmmTMB</span>(z <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(pos <span class="sc">+</span> <span class="dv">0</span> <span class="sc">|</span> group), <span class="at">data =</span> df_sample)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit the model using glmmTMB</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>fit_glmmtmb <span class="ot">&lt;-</span> <span class="fu">glmmTMB</span>(z <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(pos <span class="sc">+</span> <span class="dv">0</span> <span class="sc">|</span> group), <span class="at">data =</span> df_sample)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># This section is slow to run</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># df$zhat &lt;- predict(fit_glmmtmb, newdata = df, type = "response", allow.new.levels = TRUE)</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># inferred_plot &lt;- ggplot(df, aes(x = x, y = y, fill = zhat)) +</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_tile() +</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   scale_fill_viridis_c() +</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   labs(title = "Inferred surface") +</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme_minimal()</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co"># inferred_plot + complete_plot</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="inference-with-hamiltonian-monte-carlo-via-tmbstan" class="level1" data-number="3">
-<h1 data-number="3"><span class="header-section-number">3</span> Inference with Hamiltonian Monte Carlo via <code>tmbstan</code></h1>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Use the same objective function to run inference with tmbstan</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># fit_hmc &lt;- tmbstan(fit_glmmtmb$obj, iter = 300)</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># hmc_samples &lt;- rstan::extract(fit_hmc)</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># n_samples &lt;- nrow(hmc_samples[[1]])</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># par_names &lt;- names(fit_glmmtmb$fit$par)</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># tictoc::tic()</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co"># hmc_newparam &lt;- tidyr::expand_grid(i = 1:n_samples, par_name = unique(par_names)) |&gt;</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   mutate(newparam = purrr::map2(i, par_name, ~ as.matrix(hmc_samples[[.y]])[.x, ])) %&gt;%</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">#   group_by(i) |&gt;</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">#   summarise(newparam = list(unlist(newparam))) |&gt;</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">#   pull(newparam)</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co"># hmc_pred_list &lt;- purrr::map(hmc_newparam, function(.x) predict(fit_glmmtmb, type = "response", newparams = .x))</span></span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co"># hmc_pred_matrix &lt;- do.call(rbind, hmc_pred_list)</span></span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co"># hmc_pred &lt;- colMeans(hmc_pred_matrix)</span></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="co"># tictoc::toc()</span></span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="co"># pred &lt;- predict(fit_glmmtmb, type = "response")</span></span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot(data.frame(x = pred, y = hmc_pred), aes(x = x, y = y)) +</span></span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point() +</span></span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="co">#   coord_fixed() +</span></span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="co">#   lims(x = c(min(pred), max(pred)), y = c(min(pred), max(pred))) +</span></span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_abline(intercept = 0, slope = 1, col = "grey", linetype = "dashed") +</span></span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a><span class="co">#   labs(x = "glmmTMB prediction", y = "tmbstan prediction") +</span></span>
-<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme_minimal()</span></span>
-<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a><span class="co"># rhat &lt;- bayesplot::rhat(fit_hmc)</span></span>
-<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a><span class="co"># bayesplot::mcmc_rhat(rhat)</span></span>
-<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a><span class="co"># rhat[order(rhat)]</span></span>
-<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a><span class="co"># bayesplot::mcmc_trace(fit_hmc, pars = c("theta[1]", "theta[2]"))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-<section id="to-do" class="level1" data-number="4">
-<h1 data-number="4"><span class="header-section-number">4</span> To-do</h1>
+<section id="using-priors" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Using priors</h1>
+<p>The possible parameters of a <code>glmmTMB</code> model are:</p>
 <ul>
-<li>Try priors <code>glmmTMB</code> branch. Currently having a hard time sampling from model without priors</li>
+<li><code>beta</code>, <code>betazi</code>, <code>betad</code> (fixed-effect parameters for conditional, zero-inflation, dispersion models); * <code>b</code>, <code>bzi</code> (conditional modes for conditional and zero-inflation models);</li>
+<li><code>theta</code>, <code>thetazi</code> (random-effect parameters, on the standard deviation/Cholesky scale, for conditional and z-i models);</li>
+<li><code>psi</code> (extra family parameters, e.g., shape for Tweedie models).</li>
 </ul>
+<p>We are using the spatial exponential random effect model <code>exp</code>. Let <span class="math inline">\theta_1</span> be the log standard deviation and <span class="math inline">\theta_2</span> be the log scale parameter. The formula for the Gaussian covariance is <span class="math display">
+\rho = \exp(\theta_1) \cdot \exp \left(\frac{d^2}{\exp(\theta_2)^2} \right).
+</span></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A wide prior on the intercept</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>priors <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">prior =</span> <span class="st">"normal(0,200)"</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">class =</span> <span class="st">"fixef"</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit the model using glmmTMB</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>fit_glmmtmb_priors <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(z <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(pos <span class="sc">+</span> <span class="dv">0</span> <span class="sc">|</span> group), <span class="at">data =</span> df_sample, <span class="at">priors =</span> priors)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co"># As beta estimates are different with and without the prior looks like it's working</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>fit_glmmtmb<span class="sc">$</span>sdr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>sdreport(.) result
+        Estimate Std. Error
+beta  108.409282 17.7780550
+betad   4.920909  0.2877190
+theta   3.353272  0.2706965
+theta   3.480267  0.6386422
+Maximum gradient component: 1.53018e-06 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fit_glmmtmb_priors<span class="sc">$</span>sdr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>sdreport(.) result
+        Estimate Std. Error
+beta  107.530495 18.3227168
+betad   4.922274  0.2872169
+theta   3.359369  0.2760318
+theta   3.496205  0.6497590
+Maximum gradient component: 1.339929e-05 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># What about a prior on theta (both components?)</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="inference-with-hamiltonian-monte-carlo-via-tmbstan" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Inference with Hamiltonian Monte Carlo via <code>tmbstan</code></h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This takes a long time to run</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Use the same objective function to run inference with tmbstan</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># fit_hmc &lt;- tmbstan(fit_glmmtmb$obj, iter = 300)</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># hmc_samples &lt;- rstan::extract(fit_hmc)</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co"># n_samples &lt;- nrow(hmc_samples[[1]])</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co"># par_names &lt;- names(fit_glmmtmb$fit$par)</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co"># tictoc::tic()</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co"># hmc_newparam &lt;- tidyr::expand_grid(i = 1:n_samples, par_name = unique(par_names)) |&gt;</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#   mutate(newparam = purrr::map2(i, par_name, ~ as.matrix(hmc_samples[[.y]])[.x, ])) %&gt;%</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#   group_by(i) |&gt;</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#   summarise(newparam = list(unlist(newparam))) |&gt;</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#   pull(newparam)</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co"># hmc_pred_list &lt;- purrr::map(hmc_newparam, function(.x) predict(fit_glmmtmb, type = "response", newparams = .x))</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co"># hmc_pred_matrix &lt;- do.call(rbind, hmc_pred_list)</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co"># hmc_pred &lt;- colMeans(hmc_pred_matrix)</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="co"># tictoc::toc()</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="co"># pred &lt;- predict(fit_glmmtmb, type = "response")</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot(data.frame(x = pred, y = hmc_pred), aes(x = x, y = y)) +</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point() +</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co">#   coord_fixed() +</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="co">#   lims(x = c(min(pred), max(pred)), y = c(min(pred), max(pred))) +</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_abline(intercept = 0, slope = 1, col = "grey", linetype = "dashed") +</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="co">#   labs(x = "glmmTMB prediction", y = "tmbstan prediction") +</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme_minimal()</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="co"># rhat &lt;- bayesplot::rhat(fit_hmc)</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a><span class="co"># bayesplot::mcmc_rhat(rhat)</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="co"># rhat[order(rhat)]</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a><span class="co"># bayesplot::mcmc_trace(fit_hmc, pars = c("theta[1]", "theta[2]"))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 <section id="computing-environment" class="level1" data-number="5">
 <h1 data-number="5"><span class="header-section-number">5</span> Computing environment</h1>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>R version 4.3.2 (2023-10-31)
 Platform: aarch64-apple-darwin20 (64-bit)
@@ -246,29 +317,36 @@ attached base packages:
 
 other attached packages:
 [1] patchwork_1.2.0    ggplot2_3.4.4      dplyr_1.1.4        tmbstan_1.0.91    
-[5] rstan_2.32.5       StanHeaders_2.32.5 glmmTMB_1.1.8     
+[5] rstan_2.32.5       StanHeaders_2.32.5 glmmTMB_1.1.8-9000
 
 loaded via a namespace (and not attached):
- [1] utf8_1.2.4          generics_0.1.3      lattice_0.21-9     
- [4] lme4_1.1-35.1       digest_0.6.34       magrittr_2.0.3     
- [7] evaluate_0.23       grid_4.3.2          fastmap_1.1.1      
-[10] jsonlite_1.8.8      Matrix_1.6-5        pkgbuild_1.4.3     
-[13] gridExtra_2.3       mgcv_1.9-0          fansi_1.0.6        
-[16] viridisLite_0.4.2   QuickJSR_1.1.0      scales_1.3.0       
-[19] codetools_0.2-19    numDeriv_2016.8-1.1 cli_3.6.2          
-[22] rlang_1.1.3         munsell_0.5.0       splines_4.3.2      
-[25] withr_2.5.2         yaml_2.3.8          parallel_4.3.2     
-[28] tools_4.3.2         inline_0.3.19       nloptr_2.0.3       
-[31] minqa_1.2.6         colorspace_2.1-0    boot_1.3-28.1      
-[34] vctrs_0.6.5         R6_2.5.1            matrixStats_1.2.0  
-[37] stats4_4.3.2        lifecycle_1.0.4     htmlwidgets_1.6.4  
-[40] MASS_7.3-60         pkgconfig_2.0.3     RcppParallel_5.1.7 
-[43] pillar_1.9.0        gtable_0.3.4        loo_2.6.0          
-[46] glue_1.7.0          Rcpp_1.0.12         tidyselect_1.2.0   
-[49] xfun_0.41           tibble_3.2.1        rstudioapi_0.15.0  
-[52] knitr_1.45          farver_2.1.1        htmltools_0.5.7    
-[55] nlme_3.1-163        labeling_0.4.3      rmarkdown_2.25     
-[58] TMB_1.9.10          compiler_4.3.2     </code></pre>
+ [1] gtable_0.3.4        TMB_1.9.10          xfun_0.41          
+ [4] QuickJSR_1.1.0      htmlwidgets_1.6.4   devtools_2.4.5     
+ [7] remotes_2.4.2.1     inline_0.3.19       lattice_0.21-9     
+[10] numDeriv_2016.8-1.1 generics_0.1.3      vctrs_0.6.5        
+[13] tools_4.3.2         parallel_4.3.2      stats4_4.3.2       
+[16] curl_5.2.0          tibble_3.2.1        fansi_1.0.6        
+[19] pkgconfig_2.0.3     Matrix_1.6-5        RcppParallel_5.1.7 
+[22] lifecycle_1.0.4     farver_2.1.1        compiler_4.3.2     
+[25] stringr_1.5.1       munsell_0.5.0       codetools_0.2-19   
+[28] httpuv_1.6.13       htmltools_0.5.7     usethis_2.2.2      
+[31] yaml_2.3.8          later_1.3.2         pillar_1.9.0       
+[34] nloptr_2.0.3        urlchecker_1.0.1    MASS_7.3-60        
+[37] ellipsis_0.3.2      cachem_1.0.8        sessioninfo_1.2.2  
+[40] boot_1.3-28.1       nlme_3.1-163        mime_0.12          
+[43] tidyselect_1.2.0    digest_0.6.34       stringi_1.8.3      
+[46] purrr_1.0.2         labeling_0.4.3      splines_4.3.2      
+[49] fastmap_1.1.1       grid_4.3.2          colorspace_2.1-0   
+[52] cli_3.6.2           magrittr_2.0.3      loo_2.6.0          
+[55] pkgbuild_1.4.3      utf8_1.2.4          withr_2.5.2        
+[58] scales_1.3.0        promises_1.2.1      rmarkdown_2.25     
+[61] matrixStats_1.2.0   lme4_1.1-35.1       gridExtra_2.3      
+[64] memoise_2.0.1       shiny_1.8.0         evaluate_0.23      
+[67] knitr_1.45          viridisLite_0.4.2   miniUI_0.1.1.1     
+[70] mgcv_1.9-0          profvis_0.3.8       rlang_1.1.3        
+[73] Rcpp_1.0.12         xtable_1.8-4        glue_1.7.0         
+[76] pkgload_1.3.4       rstudioapi_0.15.0   minqa_1.2.6        
+[79] jsonlite_1.8.8      R6_2.5.1            fs_1.6.3           </code></pre>
 </div>
 </div>
 </section>

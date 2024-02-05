@@ -12,12 +12,13 @@ format:
 
 # Background
 
-This demonstration is based upon the spatial covariance [example](https://cran.r-project.org/web/packages/glmmTMB/vignettes/covstruct.html#a-spatial-covariance-example.
-) from the `glmmTMB` vignette. 
+This demonstration is based upon the spatial covariance [example](https://cran.r-project.org/web/packages/glmmTMB/vignettes/covstruct.html#a-spatial-covariance-example) from the `glmmTMB` vignette. 
 
 ```{r}
 #| message: false
 #| warning: false
+
+devtools::install_github("glmmTMB/glmmTMB/glmmTMB", ref = "priors")
 
 library(glmmTMB)
 library(tmbstan)
@@ -35,7 +36,11 @@ df <- data.frame(
   x = as.vector(row(volcano)),
   y = as.vector(col(volcano)),
   z = as.vector(volcano) + rnorm(length(volcano), sd = 15)
-)
+) |>
+  mutate(
+    group = factor(rep(1, n())),
+    pos = numFactor(x = x, y = y)
+  )
 
 # This is how the complete volcano data looks
 
@@ -54,12 +59,6 @@ partial_plot <- ggplot(df_sample, aes(x = x, y = y, fill = z)) +
   theme_minimal()
 
 complete_plot / partial_plot
-
-df_sample <- df_sample |>
-  mutate(
-    pos = numFactor(x, y),
-    group = factor(rep(1, nrow(df_sample)))
-  )
 ```
 
 # Inference with empirical Bayes and a Laplace approximation via `TMB`
@@ -67,11 +66,57 @@ df_sample <- df_sample |>
 ```{r}
 # Fit the model using glmmTMB
 fit_glmmtmb <- glmmTMB(z ~ 1 + exp(pos + 0 | group), data = df_sample)
+
+# This section is slow to run
+
+# df$zhat <- predict(fit_glmmtmb, newdata = df, type = "response", allow.new.levels = TRUE)
+# 
+# inferred_plot <- ggplot(df, aes(x = x, y = y, fill = zhat)) +
+#   geom_tile() +
+#   scale_fill_viridis_c() +
+#   labs(title = "Inferred surface") +
+#   theme_minimal()
+# 
+# inferred_plot + complete_plot
+```
+
+# Using priors
+
+The possible parameters of a `glmmTMB` model are:
+
+* `beta`, `betazi`, `betad` (fixed-effect parameters for conditional, zero-inflation, dispersion models); * `b`, `bzi` (conditional modes for conditional and zero-inflation models);
+* `theta`, `thetazi` (random-effect parameters, on the standard deviation/Cholesky scale, for conditional and z-i models);
+* `psi` (extra family parameters, e.g., shape for Tweedie models).
+
+We are using the spatial exponential random effect model `exp`.
+Let $\theta_1$ be the log standard deviation and $\theta_2$ be the log scale parameter.
+The formula for the Gaussian covariance is
+$$
+\rho = \exp(\theta_1) \cdot \exp \left(\frac{d^2}{\exp(\theta_2)^2} \right).
+$$
+```{r}
+# A wide prior on the intercept
+priors <- data.frame(
+  prior = "normal(0,200)",
+  class = "fixef"
+)
+
+# Fit the model using glmmTMB
+fit_glmmtmb_priors <- glmmTMB::glmmTMB(z ~ 1 + exp(pos + 0 | group), data = df_sample, priors = priors)
+
+# As beta estimates are different with and without the prior looks like it's working
+fit_glmmtmb$sdr
+fit_glmmtmb_priors$sdr
+
+# What about a prior on theta (both components?)
+# TODO
 ```
 
 # Inference with Hamiltonian Monte Carlo via `tmbstan`
 
 ```{r}
+# This takes a long time to run
+
 # Use the same objective function to run inference with tmbstan
 # fit_hmc <- tmbstan(fit_glmmtmb$obj, iter = 300)
 # hmc_samples <- rstan::extract(fit_hmc)
@@ -109,10 +154,6 @@ fit_glmmtmb <- glmmTMB(z ~ 1 + exp(pos + 0 | group), data = df_sample)
 # 
 # bayesplot::mcmc_trace(fit_hmc, pars = c("theta[1]", "theta[2]"))
 ```
-
-# To-do
-
-* Try priors `glmmTMB` branch. Currently having a hard time sampling from model without priors
 
 # Computing environment
 

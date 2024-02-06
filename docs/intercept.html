@@ -101,7 +101,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#no-prior" id="toc-no-prior" class="nav-link" data-scroll-target="#no-prior"><span class="header-section-number">2</span> No prior</a></li>
   <li><a href="#confirming-that-mean-and-prec-do-not-apply-to-the-intercept" id="toc-confirming-that-mean-and-prec-do-not-apply-to-the-intercept" class="nav-link" data-scroll-target="#confirming-that-mean-and-prec-do-not-apply-to-the-intercept"><span class="header-section-number">3</span> Confirming that <code>mean</code> and <code>prec</code> do not apply to the intercept</a></li>
   <li><a href="#issue-with-prec.intercept" id="toc-issue-with-prec.intercept" class="nav-link" data-scroll-target="#issue-with-prec.intercept"><span class="header-section-number">4</span> Issue with <code>prec.intercept</code></a></li>
-  <li><a href="#computing-environment" id="toc-computing-environment" class="nav-link" data-scroll-target="#computing-environment"><span class="header-section-number">5</span> Computing environment</a></li>
+  <li><a href="#how-does-mean.intercept-behave" id="toc-how-does-mean.intercept-behave" class="nav-link" data-scroll-target="#how-does-mean.intercept-behave"><span class="header-section-number">5</span> How does <code>mean.intercept</code> behave?</a></li>
+  <li><a href="#computing-environment" id="toc-computing-environment" class="nav-link" data-scroll-target="#computing-environment"><span class="header-section-number">6</span> Computing environment</a></li>
   </ul>
 </nav>
 </div>
@@ -164,14 +165,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 3.661798</code></pre>
+<pre><code>[1] 3.393019</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fit<span class="sc">$</span>summary.fixed</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                mean        sd 0.025quant 0.5quant 0.975quant     mode
-(Intercept) 3.661798 0.1065376   3.452461 3.661798   3.871136 3.661798
-                    kld
-(Intercept) 8.15181e-09</code></pre>
+<pre><code>                mean         sd 0.025quant 0.5quant 0.975quant     mode
+(Intercept) 3.393019 0.09342358    3.20945 3.393019   3.576589 3.393019
+                     kld
+(Intercept) 8.162541e-09</code></pre>
 </div>
 </div>
 </section>
@@ -187,10 +188,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>fit2<span class="sc">$</span>summary.fixed</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                mean        sd 0.025quant 0.5quant 0.975quant     mode
-(Intercept) 3.661798 0.1065376   3.452461 3.661798   3.871136 3.661798
-                    kld
-(Intercept) 8.15185e-09</code></pre>
+<pre><code>                mean         sd 0.025quant 0.5quant 0.975quant     mode
+(Intercept) 3.393019 0.09342358    3.20945 3.393019   3.576589 3.393019
+                     kld
+(Intercept) 8.162541e-09</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fit3 <span class="ot">&lt;-</span> <span class="fu">inla</span>(</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  y <span class="sc">~</span> <span class="dv">1</span>,</span>
@@ -200,10 +201,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>fit3<span class="sc">$</span>summary.fixed</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                mean        sd 0.025quant 0.5quant 0.975quant     mode
-(Intercept) 3.661798 0.1065376   3.452461 3.661798   3.871136 3.661798
-                    kld
-(Intercept) 8.15181e-09</code></pre>
+<pre><code>                mean         sd 0.025quant 0.5quant 0.975quant     mode
+(Intercept) 3.393019 0.09342358    3.20945 3.393019   3.576589 3.393019
+                     kld
+(Intercept) 8.162541e-09</code></pre>
 </div>
 </div>
 </section>
@@ -222,10 +223,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>fit4<span class="sc">$</span>summary.fixed</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                mean        sd 0.025quant 0.5quant 0.975quant     mode
-(Intercept) 3.661794 0.1065375   3.452456 3.661794   3.871131 3.661794
+<pre><code>                mean         sd 0.025quant 0.5quant 0.975quant     mode
+(Intercept) 3.393016 0.09342354   3.209447 3.393016   3.576585 3.393016
                      kld
-(Intercept) 8.151712e-09</code></pre>
+(Intercept) 8.162471e-09</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fit4<span class="sc">$</span>marginals.fixed<span class="sc">$</span><span class="st">`</span><span class="at">(Intercept)</span><span class="st">`</span> <span class="sc">|&gt;</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
@@ -248,9 +249,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>fit5<span class="sc">$</span>summary.fixed</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                   mean         sd  0.025quant    0.5quant 0.975quant
-(Intercept) 0.002581907 0.01000286 -0.01703271 0.002581905 0.02219654
-                   mode         kld
-(Intercept) 0.002581905 5.52733e-11</code></pre>
+(Intercept) 0.002809205 0.01000344 -0.01680654 0.002809202 0.02242496
+                   mode          kld
+(Intercept) 0.002809202 5.527533e-11</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>fit5<span class="sc">$</span>marginals.fixed<span class="sc">$</span><span class="st">`</span><span class="at">(Intercept)</span><span class="st">`</span> <span class="sc">|&gt;</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
@@ -271,9 +272,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>fit6<span class="sc">$</span>summary.fixed</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                   mean         sd  0.025quant    0.5quant 0.975quant
-(Intercept) 0.002581906 0.01000286 -0.01703271 0.002581904 0.02219654
-                   mode          kld
-(Intercept) 0.002581904 5.527332e-11</code></pre>
+(Intercept) 0.002808458 0.01000344 -0.01680728 0.002808455 0.02242422
+                   mode         kld
+(Intercept) 0.002808455 5.52752e-11</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>fit6<span class="sc">$</span>marginals.fixed<span class="sc">$</span><span class="st">`</span><span class="at">(Intercept)</span><span class="st">`</span> <span class="sc">|&gt;</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
@@ -293,10 +294,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>fit7<span class="sc">$</span>summary.fixed</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                mean        sd 0.025quant 0.5quant 0.975quant     mode
-(Intercept) 3.661794 0.1065375   3.452456 3.661794   3.871131 3.661794
-                     kld
-(Intercept) 8.151777e-09</code></pre>
+<pre><code>                mean         sd 0.025quant 0.5quant 0.975quant     mode
+(Intercept) 3.393016 0.09342354   3.209447 3.393016   3.576585 3.393016
+                    kld
+(Intercept) 8.16248e-09</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>fit7<span class="sc">$</span>marginals.fixed<span class="sc">$</span><span class="st">`</span><span class="at">(Intercept)</span><span class="st">`</span> <span class="sc">|&gt;</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
@@ -307,10 +308,43 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="computing-environment" class="level1" data-number="5">
-<h1 data-number="5"><span class="header-section-number">5</span> Computing environment</h1>
+<section id="how-does-mean.intercept-behave" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> How does <code>mean.intercept</code> behave?</h1>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">2</span>, <span class="at">mean =</span> <span class="dv">1000</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>fit8 <span class="ot">&lt;-</span> <span class="fu">inla</span>(</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  y <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">data.frame</span>(<span class="at">y =</span> y),</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">control.fixed =</span> <span class="fu">list</span>(<span class="at">mean.intercept =</span> <span class="dv">0</span>)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>fit8<span class="sc">$</span>summary.fixed</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                mean        sd 0.025quant 0.5quant 0.975quant     mode
+(Intercept) 1000.364 0.5144745    999.296 1000.364   1001.431 1000.364
+                    kld
+(Intercept) 0.007152865</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>fit9 <span class="ot">&lt;-</span> <span class="fu">inla</span>(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  y <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">data.frame</span>(<span class="at">y =</span> y),</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">control.fixed =</span> <span class="fu">list</span>(<span class="at">mean.intercept =</span> <span class="dv">0</span>, <span class="at">prec.intercept =</span> <span class="dv">1</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>fit9<span class="sc">$</span>summary.fixed</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                   mean        sd 0.025quant    0.5quant 0.975quant        mode
+(Intercept) 0.004375864 0.9999947  -1.956515 0.004375864   1.965266 0.004375864
+                     kld
+(Intercept) 5.526818e-11</code></pre>
+</div>
+</div>
+</section>
+<section id="computing-environment" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Computing environment</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>R version 4.3.2 (2023-10-31)
 Platform: aarch64-apple-darwin20 (64-bit)

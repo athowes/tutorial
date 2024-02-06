@@ -140,6 +140,27 @@ fit7$marginals.fixed$`(Intercept)` |>
   ggplot(aes(x = x, y = y)) +
     geom_line()
 ```
+# How does `mean.intercept` behave?
+
+```{r}
+y <- rnorm(2, mean = 1000, sd = 1)
+
+fit8 <- inla(
+  y ~ 1,
+  data = data.frame(y = y),
+  control.fixed = list(mean.intercept = 0)
+)
+
+fit8$summary.fixed
+
+fit9 <- inla(
+  y ~ 1,
+  data = data.frame(y = y),
+  control.fixed = list(mean.intercept = 0, prec.intercept = 1)
+)
+
+fit9$summary.fixed
+```
 
 # Computing environment
 

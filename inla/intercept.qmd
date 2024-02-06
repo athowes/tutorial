@@ -113,7 +113,7 @@ What about setting the `mean.intercept` to be large? There is no almost no diffe
 fit6 <- inla(
   y ~ 1,
   data = data.frame(y = y),
-  control.fixed = list(mean.intercept = 1000000, prec.intercept = 1 / low_sd^2)
+  control.fixed = list(mean.intercept = 1000, prec.intercept = 1 / low_sd^2)
 )
 
 fit6$summary.fixed
@@ -130,7 +130,7 @@ What about large `mean.intercept` with a high standard deviation? Now it's recov
 fit7 <- inla(
   y ~ 1,
   data = data.frame(y = y),
-  control.fixed = list(mean.intercept = 1000000, prec.intercept = 1 / high_sd^2)
+  control.fixed = list(mean.intercept = 1000, prec.intercept = 1 / high_sd^2)
 )
 
 fit7$summary.fixed

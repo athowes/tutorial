@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Adam Howes">
-<meta name="dcterms.date" content="2024-02-02">
+<meta name="dcterms.date" content="2024-02-06">
 
 <title>Advanced Stan</title>
 <style>
@@ -81,7 +81,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#computing-environment" id="toc-computing-environment" class="nav-link active" data-scroll-target="#computing-environment"><span class="header-section-number">1</span> Computing environment</a></li>
+  <li><a href="#distributions" id="toc-distributions" class="nav-link active" data-scroll-target="#distributions"><span class="header-section-number">1</span> Distributions</a></li>
+  <li><a href="#centered-versus-non-centered-parameterisation" id="toc-centered-versus-non-centered-parameterisation" class="nav-link" data-scroll-target="#centered-versus-non-centered-parameterisation"><span class="header-section-number">2</span> Centered versus non-centered parameterisation</a></li>
+  <li><a href="#precomputation" id="toc-precomputation" class="nav-link" data-scroll-target="#precomputation"><span class="header-section-number">3</span> Precomputation</a></li>
+  <li><a href="#vectorisation" id="toc-vectorisation" class="nav-link" data-scroll-target="#vectorisation"><span class="header-section-number">4</span> Vectorisation</a></li>
+  <li><a href="#within-chain-parallelisation" id="toc-within-chain-parallelisation" class="nav-link" data-scroll-target="#within-chain-parallelisation"><span class="header-section-number">5</span> Within-chain parallelisation</a></li>
+  <li><a href="#diagnostics" id="toc-diagnostics" class="nav-link" data-scroll-target="#diagnostics"><span class="header-section-number">6</span> Diagnostics</a></li>
+  <li><a href="#computing-environment" id="toc-computing-environment" class="nav-link" data-scroll-target="#computing-environment"><span class="header-section-number">7</span> Computing environment</a></li>
   </ul>
 </nav>
 </div>
@@ -106,7 +112,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">February 2, 2024</p>
+      <p class="date">February 6, 2024</p>
     </div>
   </div>
   
@@ -116,8 +122,44 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
-<section id="computing-environment" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> Computing environment</h1>
+<section id="distributions" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Distributions</h1>
+<ul>
+<li>Always specify bounds on parameters which have them</li>
+</ul>
+</section>
+<section id="centered-versus-non-centered-parameterisation" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Centered versus non-centered parameterisation</h1>
+</section>
+<section id="precomputation" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Precomputation</h1>
+<ul>
+<li>Calculate once rather than at every Stan iteration: move from the <code>model</code> or <code>transformed parameters</code> block into the <code>transformed data</code> block</li>
+</ul>
+</section>
+<section id="vectorisation" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Vectorisation</h1>
+<ul>
+<li>Replace for loops with matrix operations</li>
+<li>Note: what is the definition of “vectorised”? Doesn’t apply to each element individually?</li>
+</ul>
+</section>
+<section id="within-chain-parallelisation" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Within-chain parallelisation</h1>
+<ul>
+<li>You automatically get between-chain parallelisation in Stan</li>
+<li>It also supports within-chain parallelisation using <a href="https://mc-stan.org/docs/stan-users-guide/reduce-sum.html"><code>reduce_sum</code></a></li>
+<li>Of course there is an overhead to parallelisation, so you have to think carefully about it</li>
+</ul>
+</section>
+<section id="diagnostics" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Diagnostics</h1>
+<ul>
+<li>Recommended to use rank histogram plots over traceplots</li>
+</ul>
+</section>
+<section id="computing-environment" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Computing environment</h1>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">

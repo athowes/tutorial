@@ -10,7 +10,7 @@ format:
     html-math-method: katex
 ---
 
-# Model fitting and prediction
+# Poisson GLM
 
 ```{r}
 #| message: false
@@ -61,6 +61,39 @@ dim(samples_df)
 ggplot(samples_df, aes(x = id, y = value)) +
   geom_point() +
   labs(x = "id", y = "lambda")
+```
+
+# Adding zero inflation
+
+```{r}
+n <- 100
+x <- runif(n)
+eta <- -1 + x
+lambda <- exp(eta)
+z <- runif(n) > 0.35
+y <- rpois(n, lambda)
+y[!z] <- 0
+
+df <- data.frame(id = 1:n, x = x, y = y)
+
+ggplot(df, aes(x = id, y = y)) +
+  geom_point()
+
+fit_zip <- INLA::inla(
+  y ~ 1 + x,
+  family = "zeroinflatedpoisson1",
+  data = data.frame(x, y), 
+  control.predictor = list(link = 1),
+  control.compute=list(config = TRUE)
+)
+
+summary(fit_zip)
+
+samples_zip <- INLA::inla.posterior.sample(25, fit_zip)
+
+samples_zip[[1]]$hyperpar
+head(samples_zip[[1]]$latent)
+samples_zip[[1]]$logdens
 ```
 
 # Computing environment

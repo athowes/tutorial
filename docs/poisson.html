@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Adam Howes">
-<meta name="dcterms.date" content="2024-02-13">
+<meta name="dcterms.date" content="2024-02-14">
 
 <title>R-INLA Poisson GLM predictions</title>
 <style>
@@ -108,7 +108,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">February 13, 2024</p>
+      <p class="date">February 14, 2024</p>
     </div>
   </div>
   
@@ -133,7 +133,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">id =</span> <span class="dv">1</span><span class="sc">:</span>n, <span class="at">x =</span> x, <span class="at">y =</span> y)</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> id, <span class="at">y =</span> y)) <span class="sc">+</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="poisson_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
 </div>
@@ -166,13 +167,13 @@ Call:
    silent = silent, ", " inla.mode = inla.mode, safe = FALSE, debug = 
    debug, .parent.frame = .parent.frame)" ) 
 Time used:
-    Pre = 0.681, Running = 0.263, Post = 0.0122, Total = 0.957 
+    Pre = 0.758, Running = 0.261, Post = 0.0116, Total = 1.03 
 Fixed effects:
               mean    sd 0.025quant 0.5quant 0.975quant   mode kld
-(Intercept) -0.841 0.294     -1.417   -0.841     -0.266 -0.841   0
-x            0.608 0.467     -0.306    0.608      1.523  0.608   0
+(Intercept) -0.824 0.271     -1.356   -0.824     -0.293 -0.824   0
+x            0.957 0.411      0.152    0.957      1.762  0.957   0
 
-Marginal log-Likelihood:  -110.46 
+Marginal log-Likelihood:  -122.22 
  is computed 
 Posterior summaries for the linear predictor and the fitted values are computed
 (Posterior marginals needs also 'control.compute=list(return.marginals.predictor=TRUE)')</code></pre>
@@ -185,13 +186,13 @@ Posterior summaries for the linear predictor and the fitted values are computed
 </div>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(samples[[<span class="dv">1</span>]]<span class="sc">$</span>latent)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                  [,1]
-Predictor:1 -0.5916958
-Predictor:2 -0.7754182
-Predictor:3 -0.2416432
-Predictor:4 -0.4914850
-Predictor:5 -1.2136164
-Predictor:6 -0.5103333</code></pre>
+<pre><code>                   [,1]
+Predictor:1 -0.32677319
+Predictor:2 -0.01961484
+Predictor:3 -0.30763275
+Predictor:4 -0.05678597
+Predictor:5 -0.06831978
+Predictor:6 -0.30598914</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>samples[[<span class="dv">1</span>]]<span class="sc">$</span>logdens</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -199,10 +200,10 @@ Predictor:6 -0.5103333</code></pre>
 NULL
 
 $latent
-[1] 0.001378311
+[1] 0.9907144
 
 $joint
-[1] 0.001378311</code></pre>
+[1] 0.9907144</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>target <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"Predictor:"</span>, <span class="dv">1</span><span class="sc">:</span>n)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>predictor_samples <span class="ot">&lt;-</span> <span class="fu">sapply</span>(samples, <span class="cf">function</span>(x) x<span class="sc">$</span>latent[target, <span class="dv">1</span>])</span>
@@ -218,12 +219,12 @@ $joint
 <pre><code># A tibble: 6 × 3
      id sample value
   &lt;int&gt;  &lt;dbl&gt; &lt;dbl&gt;
-1     1      1 0.553
-2     1      2 0.628
-3     1      3 0.645
-4     1      4 0.603
-5     1      5 0.578
-6     1      6 0.620</code></pre>
+1     1      1 0.721
+2     1      2 0.750
+3     1      3 0.626
+4     1      4 0.684
+5     1      5 0.676
+6     1      6 0.813</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(samples_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -231,7 +232,8 @@ $joint
 </div>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(samples_df, <span class="fu">aes</span>(<span class="at">x =</span> id, <span class="at">y =</span> value)) <span class="sc">+</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"id"</span>, <span class="at">y =</span> <span class="st">"lambda"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"id"</span>, <span class="at">y =</span> <span class="st">"lambda"</span>) <span class="sc">+</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="poisson_files/figure-html/unnamed-chunk-1-2.png" class="img-fluid" width="672"></p>
 </div>
@@ -244,14 +246,16 @@ $joint
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">runif</span>(n)</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>eta <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> x</span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>lambda <span class="ot">&lt;-</span> <span class="fu">exp</span>(eta)</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">runif</span>(n) <span class="sc">&gt;</span> <span class="fl">0.35</span></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rpois</span>(n, lambda)</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>y[<span class="sc">!</span>z] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">id =</span> <span class="dv">1</span><span class="sc">:</span>n, <span class="at">x =</span> x, <span class="at">y =</span> y)</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> id, <span class="at">y =</span> y)) <span class="sc">+</span></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fl">0.35</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">runif</span>(n) <span class="sc">&gt;</span> p</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rpois</span>(n, lambda)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>y[<span class="sc">!</span>z] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">id =</span> <span class="dv">1</span><span class="sc">:</span>n, <span class="at">x =</span> x, <span class="at">y =</span> y)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> id, <span class="at">y =</span> y)) <span class="sc">+</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="poisson_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
 </div>
@@ -284,21 +288,21 @@ Call:
    silent = silent, ", " inla.mode = inla.mode, safe = FALSE, debug = 
    debug, .parent.frame = .parent.frame)" ) 
 Time used:
-    Pre = 0.548, Running = 0.231, Post = 0.0148, Total = 0.794 
+    Pre = 0.723, Running = 0.318, Post = 0.0164, Total = 1.06 
 Fixed effects:
               mean    sd 0.025quant 0.5quant 0.975quant   mode kld
-(Intercept) -0.763 0.454     -1.635   -0.768      0.141 -0.768   0
-x            1.366 0.634      0.110    1.371      2.597  1.371   0
+(Intercept) -1.107 0.395     -1.857   -1.116     -0.310 -1.117   0
+x            1.004 0.572     -0.118    1.004      2.128  1.004   0
 
 Model hyperparameters:
                                                         mean    sd 0.025quant
-zero-probability parameter for zero-inflated poisson_1 0.473 0.108      0.237
+zero-probability parameter for zero-inflated poisson_1 0.201 0.143      0.009
                                                        0.5quant 0.975quant
-zero-probability parameter for zero-inflated poisson_1    0.482      0.659
+zero-probability parameter for zero-inflated poisson_1    0.183      0.501
                                                         mode
-zero-probability parameter for zero-inflated poisson_1 0.502
+zero-probability parameter for zero-inflated poisson_1 0.007
 
-Marginal log-Likelihood:  -97.55 
+Marginal log-Likelihood:  -88.89 
  is computed 
 Posterior summaries for the linear predictor and the fitted values are computed
 (Posterior marginals needs also 'control.compute=list(return.marginals.predictor=TRUE)')</code></pre>
@@ -308,35 +312,128 @@ Posterior summaries for the linear predictor and the fitted values are computed
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>samples_zip[[<span class="dv">1</span>]]<span class="sc">$</span>hyperpar</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>zero-probability parameter for zero-inflated poisson_1 
-                                             0.1567421 </code></pre>
+                                            0.01715688 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(samples_zip[[<span class="dv">1</span>]]<span class="sc">$</span>latent)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                   [,1]
-Predictor:1 -0.79380757
-Predictor:2 -0.08614615
-Predictor:3 -0.12745472
-Predictor:4 -0.48289173
-Predictor:5 -0.92847068
-Predictor:6 -1.08293113</code></pre>
+<pre><code>                  [,1]
+Predictor:1 -1.1519714
+Predictor:2 -1.2562117
+Predictor:3 -1.0851295
+Predictor:4 -0.8933417
+Predictor:5 -0.5817497
+Predictor:6 -0.8122945</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>samples_zip[[<span class="dv">1</span>]]<span class="sc">$</span>logdens</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$hyperpar
-[1] -0.9470362
+[1] 1.810329
 
 $latent
-[1] 0.501079
+[1] 0.5136826
 
 $joint
-[1] -0.4459572</code></pre>
+[1] 2.324011</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>target <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"Predictor:"</span>, <span class="dv">1</span><span class="sc">:</span>n)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>y_samples <span class="ot">&lt;-</span> <span class="fu">sapply</span>(samples_zip, <span class="cf">function</span>(x) {</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  predictor_sample <span class="ot">&lt;-</span> x<span class="sc">$</span>latent[target, <span class="dv">1</span>]</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  lambda_sample <span class="ot">&lt;-</span> <span class="fu">exp</span>(predictor_sample)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stopifnot</span>(<span class="fu">length</span>(lambda_sample) <span class="sc">==</span> n)</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  y_sample <span class="ot">&lt;-</span> <span class="fu">rpois</span>(n, lambda_sample)</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  p_sample <span class="ot">&lt;-</span> x<span class="sc">$</span>hyperpar</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  z <span class="ot">&lt;-</span> <span class="fu">runif</span>(n) <span class="sc">&gt;</span> p_sample</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  y[<span class="sc">!</span>z] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(y)</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">t</span>(y_samples))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13] [,14]
+[1,]    0    0    1    0    0    1    0    0    1     1     0     0     0     0
+[2,]    0    0    1    0    0    1    0    0    1     1     0     0     0     0
+[3,]    0    0    1    0    0    1    0    0    1     1     0     0     0     0
+[4,]    0    0    1    0    0    1    0    0    1     1     0     0     0     0
+[5,]    0    0    1    0    0    1    0    0    1     1     0     0     0     0
+[6,]    0    0    1    0    0    1    0    0    1     1     0     0     0     0
+     [,15] [,16] [,17] [,18] [,19] [,20] [,21] [,22] [,23] [,24] [,25] [,26]
+[1,]     1     2     0     0     0     0     2     0     2     1     0     0
+[2,]     1     2     0     0     0     0     2     0     2     1     0     0
+[3,]     1     2     0     0     0     0     0     0     2     1     0     0
+[4,]     1     2     0     0     0     0     2     0     2     1     0     0
+[5,]     1     2     0     0     0     0     2     0     2     1     0     0
+[6,]     1     2     0     0     0     0     2     0     2     1     0     0
+     [,27] [,28] [,29] [,30] [,31] [,32] [,33] [,34] [,35] [,36] [,37] [,38]
+[1,]     1     0     0     0     0     0     0     1     0     0     0     0
+[2,]     1     0     0     0     0     0     2     1     0     0     0     0
+[3,]     1     0     0     0     0     0     2     1     0     0     0     0
+[4,]     1     0     0     0     0     0     2     1     0     0     0     0
+[5,]     1     0     0     0     0     0     2     1     0     0     0     0
+[6,]     1     0     0     0     0     0     2     0     0     0     0     0
+     [,39] [,40] [,41] [,42] [,43] [,44] [,45] [,46] [,47] [,48] [,49] [,50]
+[1,]     0     0     0     0     2     0     0     0     3     0     1     1
+[2,]     0     0     0     0     2     0     0     0     3     0     1     1
+[3,]     0     0     0     0     2     0     0     0     3     0     0     1
+[4,]     0     0     0     0     2     0     0     0     3     0     1     1
+[5,]     0     0     0     0     2     0     0     0     3     0     1     1
+[6,]     0     0     0     0     2     0     0     0     3     0     1     1
+     [,51] [,52] [,53] [,54] [,55] [,56] [,57] [,58] [,59] [,60] [,61] [,62]
+[1,]     1     2     0     0     0     0     0     0     0     0     0     0
+[2,]     0     2     0     0     0     0     0     0     0     0     0     0
+[3,]     1     2     0     0     0     0     0     0     0     0     0     0
+[4,]     1     2     0     0     0     0     0     0     0     0     0     0
+[5,]     1     2     0     0     0     0     0     0     0     0     0     0
+[6,]     1     2     0     0     0     0     0     0     0     0     0     0
+     [,63] [,64] [,65] [,66] [,67] [,68] [,69] [,70] [,71] [,72] [,73] [,74]
+[1,]     0     1     0     1     1     1     0     0     0     0     1     0
+[2,]     0     1     0     1     1     1     0     0     0     0     1     0
+[3,]     0     1     0     1     1     1     0     0     0     0     1     0
+[4,]     0     0     0     1     0     1     0     0     0     0     1     0
+[5,]     0     0     0     1     1     1     0     0     0     0     1     0
+[6,]     0     1     0     1     1     1     0     0     0     0     1     0
+     [,75] [,76] [,77] [,78] [,79] [,80] [,81] [,82] [,83] [,84] [,85] [,86]
+[1,]     0     3     1     0     1     0     0     0     0     0     1     0
+[2,]     0     3     1     0     1     0     0     0     0     0     1     0
+[3,]     0     3     1     0     1     0     0     0     0     0     1     0
+[4,]     0     3     1     0     1     0     0     0     0     0     1     0
+[5,]     0     3     1     0     1     0     0     0     0     0     1     0
+[6,]     0     3     1     0     1     0     0     0     0     0     1     0
+     [,87] [,88] [,89] [,90] [,91] [,92] [,93] [,94] [,95] [,96] [,97] [,98]
+[1,]     0     0     0     0     0     0     0     1     0     0     1     1
+[2,]     0     0     0     0     0     0     0     1     0     0     1     1
+[3,]     0     0     0     0     0     0     0     1     0     0     1     1
+[4,]     0     0     0     0     0     0     0     1     0     0     1     1
+[5,]     0     0     0     0     0     0     0     1     0     0     0     1
+[6,]     0     0     0     0     0     0     0     1     0     0     1     1
+     [,99] [,100]
+[1,]     0      1
+[2,]     0      1
+[3,]     0      1
+[4,]     0      1
+[5,]     0      1
+[6,]     0      1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>y_samples_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y_samples) <span class="sc">|&gt;</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">rowid_to_column</span>(<span class="st">"id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">starts_with</span>(<span class="st">"X"</span>), <span class="at">names_to =</span> <span class="st">"sample"</span>, <span class="at">values_to =</span> <span class="st">"value"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">sample =</span> <span class="fu">as.numeric</span>(<span class="fu">sub</span>(<span class="st">"^X"</span>, <span class="st">""</span>, sample)))</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>y_samples_df <span class="sc">|&gt;</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(sample <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> id, <span class="at">y =</span> value)) <span class="sc">+</span> </span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"One sample from zero-inflated outcomes"</span>) <span class="sc">+</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="poisson_files/figure-html/unnamed-chunk-2-2.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section>
 <section id="computing-environment" class="level1" data-number="3">
 <h1 data-number="3"><span class="header-section-number">3</span> Computing environment</h1>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>R version 4.3.2 (2023-10-31)
 Platform: aarch64-apple-darwin20 (64-bit)

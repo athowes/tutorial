@@ -28,7 +28,8 @@ y <- rpois(n, lambda)
 df <- data.frame(id = 1:n, x = x, y = y)
 
 ggplot(df, aes(x = id, y = y)) +
-  geom_point()
+  geom_point() +
+  theme_minimal()
 
 fit <- INLA::inla(
   y ~ 1 + x,
@@ -60,7 +61,8 @@ dim(samples_df)
 
 ggplot(samples_df, aes(x = id, y = value)) +
   geom_point() +
-  labs(x = "id", y = "lambda")
+  labs(x = "id", y = "lambda") +
+  theme_minimal()
 ```
 
 # Adding zero inflation
@@ -70,14 +72,16 @@ n <- 100
 x <- runif(n)
 eta <- -1 + x
 lambda <- exp(eta)
-z <- runif(n) > 0.35
+p <- 0.35
+z <- runif(n) > p
 y <- rpois(n, lambda)
 y[!z] <- 0
 
 df <- data.frame(id = 1:n, x = x, y = y)
 
 ggplot(df, aes(x = id, y = y)) +
-  geom_point()
+  geom_point() +
+  theme_minimal()
 
 fit_zip <- INLA::inla(
   y ~ 1 + x,
@@ -94,6 +98,33 @@ samples_zip <- INLA::inla.posterior.sample(25, fit_zip)
 samples_zip[[1]]$hyperpar
 head(samples_zip[[1]]$latent)
 samples_zip[[1]]$logdens
+
+target <- paste0("Predictor:", 1:n)
+
+y_samples <- sapply(samples_zip, function(x) {
+  predictor_sample <- x$latent[target, 1]
+  lambda_sample <- exp(predictor_sample)
+  stopifnot(length(lambda_sample) == n)
+  y_sample <- rpois(n, lambda_sample)
+  p_sample <- x$hyperpar
+  z <- runif(n) > p_sample
+  y[!z] <- 0
+  return(y)
+})
+
+head(t(y_samples))
+
+y_samples_df <- data.frame(y_samples) |>
+  tibble::rowid_to_column("id") |>
+  tidyr::pivot_longer(cols = starts_with("X"), names_to = "sample", values_to = "value") |>
+  dplyr::mutate(sample = as.numeric(sub("^X", "", sample)))
+
+y_samples_df |>
+  dplyr::filter(sample == 1) |>
+  ggplot(aes(x = id, y = value)) + 
+    geom_point() +
+    labs(title = "One sample from zero-inflated outcomes") +
+    theme_minimal()
 ```
 
 # Computing environment

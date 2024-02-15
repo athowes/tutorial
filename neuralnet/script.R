@@ -38,3 +38,6 @@ cat("Accuracy:", accuracy, "\n")
 
 pred_full <- predict(nn, data)
 class_pred_full <- ifelse(pred_full > 0.5, 1, 0)
+
+# Read this:
+# https://www.datacamp.com/tutorial/neural-network-models-r 

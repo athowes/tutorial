@@ -78,3 +78,41 @@ fit_mle$mle("theta")
 
 mcmc_hist(fit$draws("theta")) +
   vline_at(fit_mle$mle("theta"), size = 1.5)
+
+fit_map <- mod$optimize(
+  data = data,
+  jacobian = TRUE,
+  seed = 123
+)
+
+fit_laplace <- mod$laplace(
+  mode = fit_map,
+  draws = 4000,
+  data = data,
+  seed = 123,
+  refresh = 1000
+)
+
+mcmc_hist(fit_laplace$draws("theta"), binwidth = 0.025)
+
+fit_vb <- mod$variational(
+  data = data,
+  seed = 123,
+  draws = 4000
+)
+
+mcmc_hist(fit_vb$draws("theta"), binwidth = 0.025)
+
+fit_pf <- mod$pathfinder(
+  data = data,
+  seed = 123,
+  draws = 4000
+)
+
+mcmc_hist(fit_pf$draws("theta"), binwidth = 0.025)
+
+fit$save_object(file = "fit.rds")
+
+# The RStan interface (rstan package) is an in-memory interface to Stan and relies
+# on R packages like Rcpp and inline to call C++ code from R. On the other hand,
+# the CmdStanR interface does not directly call any C++ code from R

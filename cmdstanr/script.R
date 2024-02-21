@@ -116,3 +116,17 @@ fit$save_object(file = "fit.rds")
 # The RStan interface (rstan package) is an in-memory interface to Stan and relies
 # on R packages like Rcpp and inline to call C++ code from R. On the other hand,
 # the CmdStanR interface does not directly call any C++ code from R
+
+# Running Stan on the GPU with OpenCL
+# https://mc-stan.org/cmdstanr/articles/opencl.html
+# https://mc-stan.org/docs/stan-users-guide/opencl.html
+# https://arxiv.org/pdf/1907.01063.pdf
+
+# Generate some fake data
+n <- 250000
+k <- 20
+X <- matrix(rnorm(n * k), ncol = k)
+y <- rbinom(n, size = 1, prob = plogis(3 * X[,1] - 2 * X[,2] + 1))
+data <- list(k = k, n = n, y = y, X = X)
+
+mod_cl <- cmdstan_model("bernoulli_logit_glm.stan", cpp_options = list(stan_opencl = TRUE))

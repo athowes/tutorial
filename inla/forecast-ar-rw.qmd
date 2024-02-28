@@ -1,0 +1,65 @@
+---
+title: "Forecasting with the AR1 and RW1 model"
+author: "Adam Howes"
+date: "`r Sys.Date()`"
+toc: true
+number-sections: true
+format: 
+  html: 
+    code-fold: false
+    html-math-method: katex
+---
+
+# Demonstration
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(INLA)
+
+set.seed(1)
+
+n <- 100
+frequency <- 1/5
+amplitude <- 5
+x <- 1:n
+y <- amplitude * sin(frequency * x)
+y <- y + rnorm(n = n, mean = 0, sd = 2)
+
+df <- data.frame(x = c(x, 101:200), y = c(y, rep(NA, 100)))
+
+ggplot(df, aes(x = x, y = y)) +
+  geom_point()
+
+fit_rw1 <- inla(formula = y ~ 1 + f(x, model = "rw1", constr = TRUE), data = df)
+
+df_rw1 <- fit_rw1$summary.fitted.values |>
+  select(rw1_lower = `0.025quant`, rw1_pred = `0.5quant`, rw1_upper = `0.975quant`) |>
+  tibble::rowid_to_column("x")
+
+fit_ar1 <- inla(formula = y ~ 1 + f(x, model = "ar1", constr = TRUE), data = df)
+
+df_ar1 <- fit_ar1$summary.fitted.values |>
+  select(ar1_lower = `0.025quant`, ar1_pred = `0.5quant`, ar1_upper = `0.975quant`) |>
+  tibble::rowid_to_column("x")
+
+df <- df |>
+  left_join(df_rw1) |>
+  left_join(df_ar1)
+
+ggplot(df, aes(x = x, y = rw1_pred, ymin = rw1_lower, ymax = rw1_upper)) +
+  geom_ribbon(alpha = 0.2) +
+  geom_line() +
+  theme_minimal()
+
+ggplot(df, aes(x = x, y = ar1_pred, ymin = ar1_lower, ymax = ar1_upper)) +
+  geom_ribbon(alpha = 0.2) +
+  geom_line() +
+  theme_minimal()
+```
+
+# Computing environment
+
+```{r}
+sessionInfo()
+```

@@ -1,0 +1,70 @@
+---
+title: "Design effects and effective sample size"
+author: "Adam Howes"
+date: "`r Sys.Date()`"
+toc: true
+number-sections: true
+format: 
+  html: 
+    code-fold: false
+    html-math-method: katex
+---
+
+Design effect
+$$
+D_\text{eff}(\hat \theta) = \frac{\mathbb{V}_\text{complex}(\hat \theta)}{\mathbb{V}_\text{simple}(\hat \theta)}.
+$$
+
+Effective sample size
+$$
+n_\text{eff}(\hat \theta) = \frac{n}{D_\text{eff}(\hat \theta)}.
+$$
+
+Complex survey sample estimator variances affected by three components:
+
+1. Weighting
+2. Stratification
+3. Clustering
+
+# Survey of Mental Health Organisations example
+
+```{r}
+library(PracTools)
+library(sampling) 
+library(ggplot2)
+library(dplyr)
+
+data(smho.N874)
+
+smho <- smho.N874 |>
+  janitor::clean_names() |>
+  filter(hosp_type != 4) |>
+  mutate(
+    beds = case_when(beds <= 5 ~ 5, TRUE ~ beds),
+    pi1 = sampling::inclusionprobabilities(beds, 1),
+    pik = sampling::inclusionprobabilities(beds, 50)
+  )
+  
+seed <- 20230802
+set.seed(seed)
+
+sample <- sampling::UPrandomsystematic(pik = smho$pik) 
+smho_sample <- smho[sample == 1, ]
+wgt <- 1 / smho_sample$pik
+
+deffK(wgt)
+
+deffS(
+  p = smho_sample$pi1,
+  w = wgt,
+  y = smho_sample$exptotal
+)
+
+fit <- lm(exptotal ~ pi1, data = smho)
+
+ggplot(smho, aes(x = pi1, y = exptotal)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(x = "1 draw probablility of selection", y = "Total expenditure") +
+  theme_minimal()
+```

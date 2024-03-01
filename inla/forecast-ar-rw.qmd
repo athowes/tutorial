@@ -81,25 +81,6 @@ ggplot(df, aes(x = x, y = ar1_pred, ymin = ar1_lower, ymax = ar1_upper)) +
   theme_minimal()
 ```
 
-## Moving average model
-
-```{r}
-fit_ma1 <- inla(formula = y ~ 1 + f(x, model = "rw1", constr = TRUE), data = df)
-
-df_rw1 <- fit_rw1$summary.fitted.values |>
-  select(rw1_lower = `0.025quant`, rw1_pred = `0.5quant`, rw1_upper = `0.975quant`) |>
-  tibble::rowid_to_column("x")
-
-df <- df |>
-  left_join(df_rw1)
-
-ggplot(df, aes(x = x, y = rw1_pred, ymin = rw1_lower, ymax = rw1_upper)) +
-  geom_ribbon(alpha = 0.2) +
-  geom_point(shape = 1, aes(x = x, y = y)) +
-  geom_line() +
-  theme_minimal()
-```
-
 # Computing environment
 
 ```{r}

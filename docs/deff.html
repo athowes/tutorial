@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Adam Howes">
-<meta name="dcterms.date" content="2024-02-28">
+<meta name="dcterms.date" content="2024-03-02">
 
 <title>Design effects and effective sample size</title>
 <style>
@@ -97,7 +97,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#survey-of-mental-health-organisations-example" id="toc-survey-of-mental-health-organisations-example" class="nav-link active" data-scroll-target="#survey-of-mental-health-organisations-example"><span class="header-section-number">1</span> Survey of Mental Health Organisations example</a></li>
+  <li><a href="#design-effect-components" id="toc-design-effect-components" class="nav-link active" data-scroll-target="#design-effect-components"><span class="header-section-number">1</span> Design effect components</a>
+  <ul class="collapse">
+  <li><a href="#weighting" id="toc-weighting" class="nav-link" data-scroll-target="#weighting"><span class="header-section-number">1.1</span> Weighting</a></li>
+  <li><a href="#stratification" id="toc-stratification" class="nav-link" data-scroll-target="#stratification"><span class="header-section-number">1.2</span> Stratification</a></li>
+  <li><a href="#clustering" id="toc-clustering" class="nav-link" data-scroll-target="#clustering"><span class="header-section-number">1.3</span> Clustering</a></li>
+  <li><a href="#combined-formula" id="toc-combined-formula" class="nav-link" data-scroll-target="#combined-formula"><span class="header-section-number">1.4</span> Combined formula</a></li>
+  </ul></li>
+  <li><a href="#survey-of-mental-health-organisations-example" id="toc-survey-of-mental-health-organisations-example" class="nav-link" data-scroll-target="#survey-of-mental-health-organisations-example"><span class="header-section-number">2</span> Survey of Mental Health Organisations example</a></li>
   </ul>
 </nav>
 </div>
@@ -122,7 +129,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">February 28, 2024</p>
+      <p class="date">March 2, 2024</p>
     </div>
   </div>
   
@@ -132,20 +139,41 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
-<p>Design effect <span class="math display">
+<p>The design effect is the ratio of the variance of an estimator under a complex sampling scheme to that under simple random sampling <span class="math display">
 D_\text{eff}(\hat \theta) = \frac{\mathbb{V}_\text{complex}(\hat \theta)}{\mathbb{V}_\text{simple}(\hat \theta)}.
 </span></p>
-<p>Effective sample size <span class="math display">
+<p>The effective sample size is the equivalent number of simple random samples that a size <span class="math inline">n</span> complex sampling scheme produces <span class="math display">
 n_\text{eff}(\hat \theta) = \frac{n}{D_\text{eff}(\hat \theta)}.
-</span></p>
+</span> As <span class="math inline">0 &lt; D_\text{eff}(\hat \theta) &lt; \infty</span> then <span class="math inline">n_\text{eff}(\hat \theta)</span> may be greater than, equal to, or less than <span class="math inline">n</span>.</p>
 <p>Complex survey sample estimator variances affected by three components:</p>
 <ol type="1">
 <li>Weighting</li>
 <li>Stratification</li>
 <li>Clustering</li>
 </ol>
-<section id="survey-of-mental-health-organisations-example" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> Survey of Mental Health Organisations example</h1>
+<section id="design-effect-components" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Design effect components</h1>
+<section id="weighting" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="weighting"><span class="header-section-number">1.1</span> Weighting</h2>
+<p><span class="math display">
+D_\text{eff,w} = 1 + \text{CV}^2(\mathbf{w}) = 1 + \frac{\mathbb{V}(\mathbf{w})}{\mathbb{E}(\mathbf{w})^2}
+</span> where <span class="math inline">\mathbf{w}</span> is a vector of sample weights. Applies to stratified, simple random samples. If all strata population variances are equal, then a proportional allocation is optimal for estimating a mean. As such, any departure from equal weights increases the relvariance. In this sense, the assumptions of the design effect are quite restrictive. However, it is often used because of its ease.</p>
+</section>
+<section id="stratification" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="stratification"><span class="header-section-number">1.2</span> Stratification</h2>
+<p>Let <span class="math inline">h</span> denote a stratum, then <span class="math display">
+D_\text{eff,s}^h = W_h^2 \frac{n}{n_h} \times \frac{ \sigma_h^2}{ \sigma^2}
+</span></p>
+</section>
+<section id="clustering" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="clustering"><span class="header-section-number">1.3</span> Clustering</h2>
+</section>
+<section id="combined-formula" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="combined-formula"><span class="header-section-number">1.4</span> Combined formula</h2>
+</section>
+</section>
+<section id="survey-of-mental-health-organisations-example" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Survey of Mental Health Organisations example</h1>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(PracTools)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sampling) </span>

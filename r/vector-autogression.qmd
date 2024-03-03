@@ -1,0 +1,74 @@
+---
+title: "Vector autoregression"
+author: "Adam Howes"
+date: "`r Sys.Date()`"
+toc: true
+number-sections: true
+format: 
+  html: 
+    code-fold: false
+    html-math-method: katex
+---
+
+Based on the hierarchical vector autoregression [post](https://khakieconomics.github.io/2016/11/27/Hierarchical-priors-for-panel-vector-autoregressions.html) by Jim Savage.
+
+* Vector autoregression (VAR) generalises autoregressive models to multivariate time series
+* A $p$th order VAR model is denoted $\text{VAR}(p)$ and includes terms up to $p$ lags
+$$
+\mathbf{y}_t = \mathbf{c} + \mathbf{A}_1 \mathbf{y}_{t - 1} + \cdots + \mathbf{A}_p \mathbf{y}_{t - p} + \mathbf{e}_t.
+$$
+
+# Example
+
+```{r}
+#| message: false
+#| warning: false
+
+library(WDI)
+library(dplyr)
+library(rstan)
+library(ggplot2)
+
+gdp_cons_inv <- WDI(
+  country = c("US", "GB", "AU", "NZ", "CL", "CA", "IE", "ZA"),
+  indicator = c("NY.GDP.MKTP.KN", "NE.CON.TOTL.KN", "NE.GDI.FTOT.KN"),
+  start = 1970
+)
+
+gdp_cons_inv <- gdp_cons_inv |>
+  tidyr::drop_na() |>
+  rename(
+    gdp = NY.GDP.MKTP.KN,
+    cons = NE.CON.TOTL.KN,
+    gfcf = NE.GDI.FTOT.KN
+  ) |>
+  group_by(country) |>
+  arrange(year) |>
+  mutate(
+    dl_gdp = c(NA, diff(log(gdp))), 
+    dl_cons = c(NA, diff(log(cons))),
+    dl_gfcf = c(NA, diff(log(gfcf))),
+    more_than_10 = sum(!is.na(dl_gfcf)) > 10
+  ) |>
+  arrange(country, year) |>
+  ungroup() |>
+  filter(more_than_10 & is.finite(dl_gfcf))
+
+gdp_cons_inv |>
+  filter(country == "United Kingdom") |>
+  tidyr::pivot_longer(
+    cols = c("gdp", "cons", "gfcf"),
+    names_to = "indicator",
+    values_to = "value"
+  ) |>
+  ggplot(aes(x = year, y = value)) +
+  geom_line() +
+  facet_grid(indicator ~ ., scales = "free_y") +
+  theme_minimal()
+```
+
+# Computing environment
+
+```{r}
+sessionInfo()
+```

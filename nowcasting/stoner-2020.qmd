@@ -1,0 +1,53 @@
+---
+title: "Notes on \"A Powerful Modelling Framework for Nowcasting and Forecasting COVID-19 and Other Diseases\""
+author: "Adam Howes"
+date: "`r Sys.Date()`"
+toc: true
+number-sections: true
+format: 
+  html: 
+    code-fold: false
+    html-math-method: katex
+---
+
+* Delayed reporting impedes public health decision making
+* Four key sources of systematic and random variability in COVID-19 data
+
+# Introduction
+
+* Notification delay due to lags up to weeks or months
+* Hard to draw conclusions in a timely manor
+* Use a spatio-temporal hierarchical approach
+
+# Background
+
+* Counts $y$
+* $z_d$ number (they say proportion but it's not in zero one so I'd prefer to call number) observed within $d = 1:D$ delays such that $\sum_d z_d = y$
+* Variability in counts and reporting delay
+
+1. Systematic variability in $y$ (epidemic process)
+2. Random variability in $y$
+3. Systematic variability in reporting delay
+4. Random variability in reporting delay
+
+# Modelling framework
+
+$$
+y_{t, s} \sim \text{NB}(\lambda_{t, s}, \theta_s) \\
+\log(\lambda_{t, s}) = f(t, s) \\
+z_{t, s} \sim \text{GDM}(\nu_{t,s}, \phi_{t, s}, y_{t, s})
+$$
+
+* $text{GDM}$ is generalised-Dirichlet-multinomial, which is a multinomial mixture where the vector of probabilities have a generalised Dirichlet distribution
+  * Used over the more standard multinomial to allow for more over-dispersion of reporting delay
+  
+## Spatio-temporal variation
+
+* Separable model $f(t, s) = f_1(t) + f_2(s) + f_3(t, s)$
+* Don't restrict themselves to anything -- I guess wait to see what they use in the application...
+* Expected cumulative proportion $g(t, s, d) = \cdots$
+* Use GAMs looks like
+
+# Application
+
+* Using `NIMBLE`

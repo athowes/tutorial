@@ -2,3 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
+
+inla/sf.adj
+inla/zmb_areas_admin3.geojson

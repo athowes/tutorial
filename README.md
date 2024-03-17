@@ -29,3 +29,6 @@ pip install pymc3
 ## Topics to learn more about
 
 * Advanced topics in Stan (particularly related to approaches to improve performance)
+* Biology (see [Cell Biology by the Numbers](http://book.bionumbers.org/))
+* Azure
+

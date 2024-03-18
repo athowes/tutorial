@@ -57,3 +57,34 @@ ggplot(denguedat, aes(x = report_delay / 7)) +
   theme_minimal() +
   labs(x = "Reporting delay (weeks)", y = "Count")
 ```
+
+```{r}
+fit <- NobBS::NobBS(
+  data = denguedat,
+  now = as.Date("1990-10-01"),
+  units = "1 week",
+  onset_date = "onset_week",
+  report_date = "report_week"
+)
+
+summary(fit)
+```
+
+```{r}
+data.frame(sample_estimate = fit$nowcast.post.samps) |>
+  ggplot(aes(x = sample_estimate)) +
+  geom_histogram() +
+  theme_minimal() +
+  labs(x = "Cases (number)", y = "Count")
+```
+
+```{r}
+data.frame(fit$estimates) |>
+  ggplot(aes(y = estimate, ymax = upper, ymin = lower, x = onset_date)) +
+  geom_ribbon(fill = "indianred3", alpha = 0.5) +
+  geom_line(col = "indianred4", linetype = "dashed", linewidth = 0.5) +
+  geom_point(aes(y = n.reported), size = 1, shape = 1) +
+  theme_minimal() +
+  labs(x = "Case onset date", y = "Estimated cases")
+
+```

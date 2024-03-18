@@ -1,0 +1,59 @@
+---
+title: "Notes on \"Nowcasting by Bayesian Smoothing: A flexible, generalizable model for real-time epidemic tracking\""
+author: "Adam Howes"
+date: "`r Sys.Date()`"
+toc: true
+number-sections: true
+format: 
+  html: 
+    code-fold: false
+    html-math-method: katex
+---
+
+# Introduction
+
+* Nowcasting by Bayesian smoothing (NobBS)
+* Demonstrate on dengue cases in Puerto Rico and influenza-like illnesses in the US
+
+# Materials and methods
+
+* $n_{t, d}$ cases reported for week $t$ with delay $d$
+* Likelihood: $n_{t, d} \sim \text{Pois}(\lambda_{t, d})$ or $n_{t, d} \sim \text{NB}(r, p_{t, d})$ where $p_{t, d} = r / (r + \lambda_{t, d})$
+* Latent: $\log(\lambda_{t, d}) = \alpha_t + \log(\beta_t)$
+  * $\alpha_t$ true epidemiological signal with random walk prior $\alpha_t \sim \text{RW}(1)$
+  * $\beta_t$ probability of reporting with delay $d$ specified using Dirichlet prior $\beta_d \sim \text{Dir}(\theta)$
+  * i.e. random effects for week and for delay
+  * $\lambda_{t, d} = \exp(\alpha_t) \times \beta_t$
+  * See general chain ladder model from actuarial science
+* Hyperparameters
+  * $\tau_\alpha \sim \text{Gamma}(0.01, 0.01)$
+  * $r \sim \text{Gamma}(60, 20)$
+  
+# Implementation
+
+* https://github.com/sarahhbellum/NobBS
+* `NobBS` R package
+* Uses JAGS i.e. a Gibbs sampler (is Martyn Plummer still maintaining this?)
+
+
+```{r}
+# devtools::install_github("sarahhbellum/NobBS")
+library(NobBS)
+library(ggplot2)
+library(dplyr)
+
+data(denguedat)
+head(denguedat)
+
+denguedat <- denguedat |>
+  mutate(
+    report_delay = report_week - onset_week
+  )
+```
+
+```{r}
+ggplot(denguedat, aes(x = report_delay / 7)) +
+  geom_histogram() +
+  theme_minimal() +
+  labs(x = "Reporting delay (weeks)", y = "Count")
+```

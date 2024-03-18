@@ -100,6 +100,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
   <li><a href="#materials-and-methods" id="toc-materials-and-methods" class="nav-link" data-scroll-target="#materials-and-methods"><span class="header-section-number">2</span> Materials and methods</a></li>
   <li><a href="#implementation" id="toc-implementation" class="nav-link" data-scroll-target="#implementation"><span class="header-section-number">3</span> Implementation</a></li>
+  <li><a href="#my-version" id="toc-my-version" class="nav-link" data-scroll-target="#my-version"><span class="header-section-number">4</span> My version?</a></li>
   </ul>
 </nav>
 </div>
@@ -262,6 +263,34 @@ params.post           82  data.frame list   </code></pre>
 <p><img src="mcgough-2020_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+</section>
+<section id="my-version" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> My version?</h1>
+<p>Here is the code for their JAGS model:</p>
+<pre><code>model
+{
+  # Likelihood
+  for( t in 1:Today ){
+  for(d in 0:D){
+  n[t,(d+1)] ~ dpois(lambda[t,(d+1)])
+  log(lambda[t,(d+1)]) &lt;- alpha[t] + beta.logged[(d+1)]
+  }
+  sum.n[t] &lt;- sum(n[t,])
+  sum.lambda[t] &lt;- sum(lambda[t,])
+  }
+  # Prior for alpha
+  alpha[1] ~ dnorm(alpha1.mean.prior, alpha1.prec.prior)
+  for( t in 2:Today ){
+  alpha[t] ~ dnorm(alpha[t-1],tau2.alpha)
+  }
+  ## Prior for beta
+  beta.logged &lt;- log(beta)
+  beta ~ ddirch(beta.priors)
+  
+  # Prior for variance
+  tau2.alpha ~ dgamma(alphat.shape.prior,alphat.rate.prior)
+}</code></pre>
+<p>Shouldn’t be too hard to put this into Stan.</p>
 </section>
 
 </main>

@@ -10,6 +10,8 @@ format:
     html-math-method: katex
 ---
 
+Following: https://noamross.github.io/gams-in-r-course
+
 # Chapter 1
 
 ```{r}
@@ -62,4 +64,36 @@ draw(mod_city2, residuals = TRUE)
 
 mod_city3 <- gam(city.mpg ~ s(weight, by = drive) + s(length, by = drive) + s(price, by = drive), data = mpg, method = "REML")
 draw(mod_city3, residuals = TRUE)
+```
+
+# Chapter 2
+
+* `edf` is effective degrees of freedom
+
+```{r}
+mod_city4 <- gam(city.mpg ~ s(weight) + s(length) + s(price) + s(rpm) + s(width), data = mpg, method = "REML")
+summary(mod_city4)
+```
+
+```{r}
+set.seed(0)
+dat <- gamSim(1, n = 200)
+mod <- gam(y ~ s(x0, k = 5) + s(x1, k = 5) + s(x2, k = 5) + s(x3, k = 5), data = dat, method = "REML")
+draw(mod) # Here x2 does not have enough basis functions
+gam.check(mod)
+```
+
+# Chapter 3
+
+```{r}
+data(meuse, package = "sp")
+
+mod2d <- gam(cadmium ~ s(x, y), data = meuse, method = "REML")
+summary(mod2d)
+coef(mod2d)
+
+mod2da <- gam(cadmium ~ s(x, y) + s(elev) + s(dist), data = meuse, method = "REML")
+summary(mod2da)
+
+draw(mod2d)
 ```

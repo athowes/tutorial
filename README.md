@@ -31,4 +31,4 @@ pip install pymc3
 * Advanced topics in Stan (particularly related to approaches to improve performance)
 * Biology (see [Cell Biology by the Numbers](http://book.bionumbers.org/))
 * Azure
-
+* The extent to which linear model theory translates to more complex (e.g. GLMM) settings

@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Adam Howes">
-<meta name="dcterms.date" content="2024-03-01">
+<meta name="dcterms.date" content="2024-04-11">
 
-<title>Forecasting with the AR1 and RW1 model</title>
+<title>Forecasting with the AR1, RW1, and seasonal model</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -59,16 +59,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="forecast-ar-rw_files/libs/clipboard/clipboard.min.js"></script>
-<script src="forecast-ar-rw_files/libs/quarto-html/quarto.js"></script>
-<script src="forecast-ar-rw_files/libs/quarto-html/popper.min.js"></script>
-<script src="forecast-ar-rw_files/libs/quarto-html/tippy.umd.min.js"></script>
-<script src="forecast-ar-rw_files/libs/quarto-html/anchor.min.js"></script>
-<link href="forecast-ar-rw_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="forecast-ar-rw_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="forecast-ar-rw_files/libs/bootstrap/bootstrap.min.js"></script>
-<link href="forecast-ar-rw_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="forecast-ar-rw_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="forecast-time-series_files/libs/clipboard/clipboard.min.js"></script>
+<script src="forecast-time-series_files/libs/quarto-html/quarto.js"></script>
+<script src="forecast-time-series_files/libs/quarto-html/popper.min.js"></script>
+<script src="forecast-time-series_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="forecast-time-series_files/libs/quarto-html/anchor.min.js"></script>
+<link href="forecast-time-series_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="forecast-time-series_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="forecast-time-series_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="forecast-time-series_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="forecast-time-series_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 
   <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
   <script>document.addEventListener("DOMContentLoaded", function () {
@@ -102,6 +102,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#random-walk-model" id="toc-random-walk-model" class="nav-link" data-scroll-target="#random-walk-model"><span class="header-section-number">2.1</span> Random walk model</a></li>
   <li><a href="#autoregressive-model" id="toc-autoregressive-model" class="nav-link" data-scroll-target="#autoregressive-model"><span class="header-section-number">2.2</span> Autoregressive model</a></li>
+  <li><a href="#seasonal-model" id="toc-seasonal-model" class="nav-link" data-scroll-target="#seasonal-model"><span class="header-section-number">2.3</span> Seasonal model</a></li>
   </ul></li>
   <li><a href="#computing-environment" id="toc-computing-environment" class="nav-link" data-scroll-target="#computing-environment"><span class="header-section-number">3</span> Computing environment</a></li>
   </ul>
@@ -111,7 +112,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Forecasting with the AR1 and RW1 model</h1>
+<h1 class="title">Forecasting with the AR1, RW1, and seasonal model</h1>
 </div>
 
 
@@ -128,7 +129,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">March 1, 2024</p>
+      <p class="date">April 11, 2024</p>
     </div>
   </div>
   
@@ -185,10 +186,11 @@ Attaching package: 'dplyr'</code></pre>
 <span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
 <span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Warning: Removed 100 rows containing missing values (`geom_point()`).</code></pre>
+<pre><code>Warning: Removed 100 rows containing missing values or values outside the scale range
+(`geom_point()`).</code></pre>
 </div>
 <div class="cell-output-display">
-<p><img src="forecast-ar-rw_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+<p><img src="forecast-time-series_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <section id="random-walk-model" class="level2" data-number="2.1">
@@ -211,10 +213,11 @@ Attaching package: 'dplyr'</code></pre>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Warning: Removed 100 rows containing missing values (`geom_point()`).</code></pre>
+<pre><code>Warning: Removed 100 rows containing missing values or values outside the scale range
+(`geom_point()`).</code></pre>
 </div>
 <div class="cell-output-display">
-<p><img src="forecast-ar-rw_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+<p><img src="forecast-time-series_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section>
@@ -234,14 +237,44 @@ Attaching package: 'dplyr'</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> ar1_pred, <span class="at">ymin =</span> ar1_lower, <span class="at">ymax =</span> ar1_upper)) <span class="sc">+</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape =</span> <span class="dv">1</span>, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)) <span class="sc">+</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape =</span> <span class="dv">1</span>, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)) <span class="sc">+</span></span>
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Warning: Removed 100 rows containing missing values (`geom_point()`).</code></pre>
+<pre><code>Warning: Removed 100 rows containing missing values or values outside the scale range
+(`geom_point()`).</code></pre>
 </div>
 <div class="cell-output-display">
-<p><img src="forecast-ar-rw_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+<p><img src="forecast-time-series_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="seasonal-model" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="seasonal-model"><span class="header-section-number">2.3</span> Seasonal model</h2>
+<p>How do you specify the <code>season.length</code>? Would prefer to put a prior on this.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>fit_seasonal <span class="ot">&lt;-</span> <span class="fu">inla</span>(<span class="at">formula =</span> y <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> <span class="fu">f</span>(x, <span class="at">model =</span> <span class="st">"seasonal"</span>, <span class="at">season.length =</span> <span class="dv">10</span>, <span class="at">constr =</span> <span class="cn">TRUE</span>), <span class="at">data =</span> df)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>df_seasonal <span class="ot">&lt;-</span> fit_seasonal<span class="sc">$</span>summary.fitted.values <span class="sc">|&gt;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="at">seasonal_lower =</span> <span class="st">`</span><span class="at">0.025quant</span><span class="st">`</span>, <span class="at">seasonal_pred =</span> <span class="st">`</span><span class="at">0.5quant</span><span class="st">`</span>, <span class="at">seasonal_upper =</span> <span class="st">`</span><span class="at">0.975quant</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">rowid_to_column</span>(<span class="st">"x"</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(df_seasonal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining with `by = join_by(x)`</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> seasonal_pred, <span class="at">ymin =</span> seasonal_lower, <span class="at">ymax =</span> seasonal_upper)) <span class="sc">+</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape =</span> <span class="dv">1</span>, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)) <span class="sc">+</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 100 rows containing missing values or values outside the scale range
+(`geom_point()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="forecast-time-series_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section>
@@ -249,7 +282,7 @@ Attaching package: 'dplyr'</code></pre>
 <section id="computing-environment" class="level1" data-number="3">
 <h1 data-number="3"><span class="header-section-number">3</span> Computing environment</h1>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>R version 4.3.2 (2023-10-31)
 Platform: aarch64-apple-darwin20 (64-bit)
@@ -269,7 +302,7 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] INLA_24.01.29 sp_2.1-2      Matrix_1.6-5  dplyr_1.1.4   ggplot2_3.4.4
+[1] INLA_24.01.29 sp_2.1-2      Matrix_1.6-5  dplyr_1.1.4   ggplot2_3.5.0
 
 loaded via a namespace (and not attached):
  [1] gtable_0.3.4       jsonlite_1.8.8     compiler_4.3.2     tidyselect_1.2.0  
@@ -278,8 +311,8 @@ loaded via a namespace (and not attached):
 [13] R6_2.5.1           labeling_0.4.3     generics_0.1.3     classInt_0.4-10   
 [17] sf_1.0-15          knitr_1.45         htmlwidgets_1.6.4  tibble_3.2.1      
 [21] fmesher_0.1.5      units_0.8-5        munsell_0.5.0      DBI_1.2.0         
-[25] pillar_1.9.0       rlang_1.1.3        utf8_1.2.4         xfun_0.41         
-[29] cli_3.6.2          withr_2.5.2        magrittr_2.0.3     class_7.3-22      
+[25] pillar_1.9.0       rlang_1.1.3        utf8_1.2.4         xfun_0.42         
+[29] cli_3.6.2          withr_3.0.0        magrittr_2.0.3     class_7.3-22      
 [33] digest_0.6.34      grid_4.3.2         rstudioapi_0.15.0  lifecycle_1.0.4   
 [37] vctrs_0.6.5        KernSmooth_2.23-22 proxy_0.4-27       evaluate_0.23     
 [41] glue_1.7.0         farver_2.1.1       e1071_1.7-14       fansi_1.0.6       

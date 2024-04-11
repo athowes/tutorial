@@ -1,5 +1,5 @@
 ---
-title: "Forecasting with the AR1 and RW1 model"
+title: "Forecasting with the AR1, RW1, and seasonal model"
 author: "Adam Howes"
 date: "`r Sys.Date()`"
 toc: true
@@ -76,8 +76,30 @@ df <- df |>
 
 ggplot(df, aes(x = x, y = ar1_pred, ymin = ar1_lower, ymax = ar1_upper)) +
   geom_ribbon(alpha = 0.2) +
-  geom_point(shape = 1, aes(x = x, y = y)) +
   geom_line() +
+  geom_point(shape = 1, aes(x = x, y = y)) +
+  theme_minimal()
+```
+
+## Seasonal model
+
+How do you specify the `season.length`?
+Would prefer to put a prior on this.
+
+```{r}
+fit_seasonal <- inla(formula = y ~ 1 + f(x, model = "seasonal", season.length = 10, constr = TRUE), data = df)
+
+df_seasonal <- fit_seasonal$summary.fitted.values |>
+  select(seasonal_lower = `0.025quant`, seasonal_pred = `0.5quant`, seasonal_upper = `0.975quant`) |>
+  tibble::rowid_to_column("x")
+
+df <- df |>
+  left_join(df_seasonal)
+
+ggplot(df, aes(x = x, y = seasonal_pred, ymin = seasonal_lower, ymax = seasonal_upper)) +
+  geom_ribbon(alpha = 0.2) +
+  geom_line() +
+  geom_point(shape = 1, aes(x = x, y = y)) +
   theme_minimal()
 ```
 

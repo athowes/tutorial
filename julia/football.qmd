@@ -1,0 +1,17 @@
+---
+title: "Introduction to probabilistic programming in Julia"
+author: "Adam Howes"
+date: "`r Sys.Date()`"
+toc: true
+number-sections: true
+format: 
+  html: 
+    code-fold: false
+    html-math-method: katex
+---
+
+Following https://quarto.org/docs/computations/julia.html
+
+```{julia}
+2 + 2
+```

@@ -44,3 +44,28 @@ df[with(df, x > 1), ]
 
 flights[, !c("arr_delay", "dep_delay")]
 flights[, -c("arr_delay", "dep_delay")]
+
+# Checking about which data.table operations modify in place
+
+# Many data.table operations modify in place by default
+# 1. Assignment by reference using :=
+dt <- data.table(x = 1:5, y = 6:10)
+dt[x > 3, y := 0]
+dt
+
+# 2. Adding or modifying columns by reference
+dt[, z := x + y]
+dt
+
+# 3. Removing columns by reference
+dt[, z := NULL]
+dt
+
+# 4. Setting a key
+setkey(dt, y)
+
+# 5. Using functions which modify in place e.g. set, setnames, setattr
+
+# 6. Using update by reference
+set(dt, i = which(dt$x > 3), j = "y", value = 0)
+dt

@@ -27,5 +27,6 @@
     * Single timeline
     * No merge commits; every commit is a change
     * Requires history rewriting
-* Always do fast forward merge when pulling to main (TODO: understand better why this is)
+* Always do fast forward merge when pulling to main
+  * This is a safe guard
 * If there are no conflicts, just use squash and merge on GitHub, no need to use command line

@@ -15,3 +15,8 @@ fit <- brms::brm(formula = y ~ 1, family = gaussian(), data = df)
 fit_trun_oracle <- brms::brm(formula = trunc(y, lb = 6, ub = 10) ~ 1, family = gaussian(), data = df)
 fit_trun_oracle_ub <- brms::brm(formula = trunc(y, ub = 10) ~ 1, family = gaussian(), data = df)
 fit_trun_oracle_lb <- brms::brm(formula = trunc(y, lb = 6) ~ 1, family = gaussian(), data = df)
+
+fit
+fit_trun_oracle
+fit_trun_oracle_ub
+fit_trun_oracle_lb

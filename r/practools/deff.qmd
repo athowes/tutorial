@@ -1,0 +1,96 @@
+---
+title: "Design effects and effective sample size"
+author: "Adam Howes"
+date: "`r Sys.Date()`"
+toc: true
+number-sections: true
+format: 
+  html: 
+    code-fold: false
+    html-math-method: katex
+---
+
+The design effect is the ratio of the variance of an estimator under a complex sampling scheme to that under simple random sampling
+$$
+D_\text{eff}(\hat \theta) = \frac{\mathbb{V}_\text{complex}(\hat \theta)}{\mathbb{V}_\text{simple}(\hat \theta)}.
+$$
+
+The effective sample size is the equivalent number of simple random samples that a size $n$ complex sampling scheme produces
+$$
+n_\text{eff}(\hat \theta) = \frac{n}{D_\text{eff}(\hat \theta)}.
+$$
+As $0 < D_\text{eff}(\hat \theta) < \infty$ then $n_\text{eff}(\hat \theta)$ may be greater than, equal to, or less than $n$.
+
+Complex survey sample estimator variances affected by three components:
+
+1. Weighting
+2. Stratification
+3. Clustering
+
+# Design effect components
+
+## Weighting
+
+$$
+D_\text{eff,w} = 1 + \text{CV}^2(\mathbf{w}) = 1 + \frac{\mathbb{V}(\mathbf{w})}{\mathbb{E}(\mathbf{w})^2}
+$$
+where $\mathbf{w}$ is a vector of sample weights.
+Applies to stratified, simple random samples.
+If all strata population variances are equal, then a proportional allocation is optimal for estimating a mean.
+As such, any departure from equal weights increases the relvariance.
+In this sense, the assumptions of the design effect are quite restrictive.
+However, it is often used because of its ease.
+
+## Stratification
+
+Let $h$ denote a stratum, then
+$$
+D_\text{eff,s}^h = W_h^2 \frac{n}{n_h} \times \frac{ \sigma_h^2}{ \sigma^2}
+$$
+
+## Clustering
+
+## Combined formula
+
+# Survey of Mental Health Organisations example
+
+```{r}
+library(PracTools)
+library(sampling) 
+library(ggplot2)
+library(dplyr)
+
+data(smho.N874)
+
+smho <- smho.N874 |>
+  janitor::clean_names() |>
+  filter(hosp_type != 4) |>
+  mutate(
+    beds = case_when(beds <= 5 ~ 5, TRUE ~ beds),
+    pi1 = sampling::inclusionprobabilities(beds, 1),
+    pik = sampling::inclusionprobabilities(beds, 50)
+  )
+  
+seed <- 20230802
+set.seed(seed)
+
+sample <- sampling::UPrandomsystematic(pik = smho$pik) 
+smho_sample <- smho[sample == 1, ]
+wgt <- 1 / smho_sample$pik
+
+deffK(wgt)
+
+deffS(
+  p = smho_sample$pi1,
+  w = wgt,
+  y = smho_sample$exptotal
+)
+
+fit <- lm(exptotal ~ pi1, data = smho)
+
+ggplot(smho, aes(x = pi1, y = exptotal)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(x = "1 draw probablility of selection", y = "Total expenditure") +
+  theme_minimal()
+```

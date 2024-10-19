@@ -1,0 +1,40 @@
+---
+title: "Notes on \"Estimating and Projecting Trends in HIV/AIDS Generalized Epidemics Using IMIS\""
+author: "Adam Howes"
+date: "`r Sys.Date()`"
+toc: true
+number-sections: true
+format: 
+  html: 
+    code-fold: false
+    html-math-method: katex
+---
+
+* Posterior distribution approximated by sampling-importance-resampling
+    * For some countries the posterior tends to be concentrated around nonlinear ridges and can also be multimodal
+* EPP [UNAIDS](http://epidem.org/)
+    * $\theta = (r, t_0, f_0, \phi)$ where
+        * $r$ is the force of infection
+        * $t_0$ is the start year of the HIV/AIDS epidemic
+        * $f_0$ is the initial fraction of the adult population at risk of infection
+        * $\phi$ is the behaviour adjustment parameter
+    * The output is a sequence of yearly HIV prevalence rates $\rho$
+    * Not-at-risk group $X(t)$, at-risk group $Z(t)$, infected group $Y(t)$
+    * Assumes constant non-AIDS mortality rate $\mu$ and constant fertility rate
+    * Does not represent migration or age structure
+* Bayesian melding approach applied to EPP model
+    * Specify a prior on $\theta$
+    * ANC and DHS data give the likelihood $L(\rho)$ using a hierarchical random effect model
+    * Specify a prior on model output $\rho$ (uniform between certain bounds)
+* Take the following steps
+  1. $N$ i.i.d. samples from $p(\theta)$
+  2. Run the model to get a $\rho_i$ corresponding to $\theta_i$ with likelihood $L_i = L(\rho_i)$
+  3. Importance weights $w_i = L_i / \sum_{j = 1}^N L_j$
+  4. Sample from $\{\theta_{1:N} \}$ with probabilities $\{ w_{1:N} \}$ to approximate the posterior distribution of the inputs and outputs
+* For most countries this works well
+* For some countries there are a small number of large importance weights which dominate the resample
+* Incremental Mixture Importance Sampling
+    * Points with large weights are areas where the target density is very under-represented
+    * At each iteration add a multivariate normal to the point with highest importance weight to the importance sampling distribution (which is then a mixture of such functions and the prior)
+    * The algorithm ends when the importance sampling weights are reasonably uniform
+* Next step here would be to play around with the package, and a toy implementation

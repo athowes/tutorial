@@ -1,0 +1,122 @@
+---
+title: "Notes on \"Nowcasting by Bayesian Smoothing: A flexible, generalizable model for real-time epidemic tracking\""
+author: "Adam Howes"
+date: "`r Sys.Date()`"
+toc: true
+number-sections: true
+format: 
+  html: 
+    code-fold: false
+    html-math-method: katex
+---
+
+# Introduction
+
+* Nowcasting by Bayesian smoothing (NobBS)
+* Demonstrate on dengue cases in Puerto Rico and influenza-like illnesses in the US
+
+# Materials and methods
+
+* $n_{t, d}$ cases reported for week $t$ with delay $d$
+* Likelihood: $n_{t, d} \sim \text{Pois}(\lambda_{t, d})$ or $n_{t, d} \sim \text{NB}(r, p_{t, d})$ where $p_{t, d} = r / (r + \lambda_{t, d})$
+* Latent: $\log(\lambda_{t, d}) = \alpha_t + \log(\beta_t)$
+  * $\alpha_t$ true epidemiological signal with random walk prior $\alpha_t \sim \text{RW}(1)$
+  * $\beta_t$ probability of reporting with delay $d$ specified using Dirichlet prior $\beta_d \sim \text{Dir}(\theta)$
+  * i.e. random effects for week and for delay
+  * $\lambda_{t, d} = \exp(\alpha_t) \times \beta_t$
+  * See general chain ladder model from actuarial science
+* Hyperparameters
+  * $\tau_\alpha \sim \text{Gamma}(0.01, 0.01)$
+  * $r \sim \text{Gamma}(60, 20)$
+  
+# Implementation
+
+* https://github.com/sarahhbellum/NobBS
+* `NobBS` R package
+* Uses JAGS i.e. a Gibbs sampler (is Martyn Plummer still maintaining this?)
+
+
+```{r}
+# devtools::install_github("sarahhbellum/NobBS")
+library(NobBS)
+library(ggplot2)
+library(dplyr)
+
+data(denguedat)
+head(denguedat)
+
+denguedat <- denguedat |>
+  mutate(
+    report_delay = report_week - onset_week
+  )
+```
+
+```{r}
+ggplot(denguedat, aes(x = report_delay / 7)) +
+  geom_histogram() +
+  theme_minimal() +
+  labs(x = "Reporting delay (weeks)", y = "Count")
+```
+
+```{r}
+fit <- NobBS::NobBS(
+  data = denguedat,
+  now = as.Date("1990-10-01"),
+  units = "1 week",
+  onset_date = "onset_week",
+  report_date = "report_week"
+)
+
+summary(fit)
+```
+
+```{r}
+data.frame(sample_estimate = fit$nowcast.post.samps) |>
+  ggplot(aes(x = sample_estimate)) +
+  geom_histogram() +
+  theme_minimal() +
+  labs(x = "Cases (number)", y = "Count")
+```
+
+```{r}
+data.frame(fit$estimates) |>
+  ggplot(aes(y = estimate, ymax = upper, ymin = lower, x = onset_date)) +
+  geom_ribbon(fill = "indianred3", alpha = 0.5) +
+  geom_line(col = "indianred4", linetype = "dashed", linewidth = 0.5) +
+  geom_point(aes(y = n.reported), size = 1, shape = 1) +
+  theme_minimal() +
+  labs(x = "Case onset date", y = "Estimated cases")
+
+```
+
+# My version?
+
+Here is the code for their JAGS model:
+
+```
+model
+{
+  # Likelihood
+  for( t in 1:Today ){
+  for(d in 0:D){
+  n[t,(d+1)] ~ dpois(lambda[t,(d+1)])
+  log(lambda[t,(d+1)]) <- alpha[t] + beta.logged[(d+1)]
+  }
+  sum.n[t] <- sum(n[t,])
+  sum.lambda[t] <- sum(lambda[t,])
+  }
+  # Prior for alpha
+  alpha[1] ~ dnorm(alpha1.mean.prior, alpha1.prec.prior)
+  for( t in 2:Today ){
+  alpha[t] ~ dnorm(alpha[t-1],tau2.alpha)
+  }
+  ## Prior for beta
+  beta.logged <- log(beta)
+  beta ~ ddirch(beta.priors)
+  
+  # Prior for variance
+  tau2.alpha ~ dgamma(alphat.shape.prior,alphat.rate.prior)
+}
+```
+
+Shouldn't be too hard to put this into Stan.

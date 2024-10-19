@@ -1,0 +1,99 @@
+---
+title: "GAMs"
+author: "Adam Howes"
+date: "`r Sys.Date()`"
+toc: true
+number-sections: true
+format: 
+  html: 
+    code-fold: false
+    html-math-method: katex
+---
+
+Following: https://noamross.github.io/gams-in-r-course
+
+# Chapter 1
+
+```{r}
+library(mgcv)
+library(gratia)
+library(patchwork)
+
+mcycle <- MASS::mcycle
+
+gam_mod <- gam(accel ~ s(times), data = mcycle)
+draw(gam_mod, residuals = TRUE)
+coef(gam_mod)
+
+gam_mod_k3 <- gam(accel ~ s(times, k = 3), data = mcycle)
+coef(gam_mod_k3)
+
+gam_mod_k20 <- gam(accel ~ s(times, k = 20), data = mcycle)
+coef(gam_mod_k20)
+
+draw(gam_mod_k3, residuals = TRUE)
+draw(gam_mod_k20, residuals = TRUE)
+
+gam_mod$sp
+
+gam_mod_s1 <- gam(accel ~ s(times), data = mcycle, sp = 0.1)
+gam_mod_s2 <- gam(accel ~ s(times), data = mcycle, sp = 0.0001)
+
+draw(gam_mod_s1, residuals = TRUE)
+draw(gam_mod_s2, residuals = TRUE)
+
+gam_mod_sk <- gam(accel ~ s(times, k = 50), data = mcycle, sp = 0.0001)
+
+draw(gam_mod_sk, residuals = TRUE)
+```
+
+```{r}
+library(gamair)
+data("mpg", package = "gamair")
+
+head(mpg)
+
+mod_city <- gam(city.mpg ~ s(weight) + s(length) + s(price), data = mpg, method = "REML")
+draw(mod_city, residuals = TRUE)
+
+mod_city <- gam(city.mpg ~ s(weight) + s(length) + s(price), data = mpg, method = "REML")
+draw(mod_city, residuals = TRUE)
+
+mod_city2 <- gam(city.mpg ~ s(weight) + s(length) + s(price) + fuel + drive + style, data = mpg, method = "REML")
+draw(mod_city2, residuals = TRUE)
+
+mod_city3 <- gam(city.mpg ~ s(weight, by = drive) + s(length, by = drive) + s(price, by = drive), data = mpg, method = "REML")
+draw(mod_city3, residuals = TRUE)
+```
+
+# Chapter 2
+
+* `edf` is effective degrees of freedom
+
+```{r}
+mod_city4 <- gam(city.mpg ~ s(weight) + s(length) + s(price) + s(rpm) + s(width), data = mpg, method = "REML")
+summary(mod_city4)
+```
+
+```{r}
+set.seed(0)
+dat <- gamSim(1, n = 200)
+mod <- gam(y ~ s(x0, k = 5) + s(x1, k = 5) + s(x2, k = 5) + s(x3, k = 5), data = dat, method = "REML")
+draw(mod) # Here x2 does not have enough basis functions
+gam.check(mod)
+```
+
+# Chapter 3
+
+```{r}
+data(meuse, package = "sp")
+
+mod2d <- gam(cadmium ~ s(x, y), data = meuse, method = "REML")
+summary(mod2d)
+coef(mod2d)
+
+mod2da <- gam(cadmium ~ s(x, y) + s(elev) + s(dist), data = meuse, method = "REML")
+summary(mod2da)
+
+draw(mod2d)
+```

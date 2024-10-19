@@ -1,0 +1,51 @@
+---
+title: "Splines"
+author: "Adam Howes"
+date: "`r Sys.Date()`"
+toc: true
+number-sections: true
+format: 
+  html: 
+    code-fold: false
+    html-math-method: katex
+---
+
+```{r}
+library(splines2)
+library(ggplot2)
+library(tidyverse)
+```
+
+# Background
+
+* Splines are continous, piece-wise polynomial functions
+
+
+# B-splines
+
+* Based on Bezier curves
+
+```{r}
+knots <- c(0.3, 0.5, 0.6)
+pos <- seq(0, 1, 0.01)
+bsMat <- splines2::bSpline(pos, knots = knots, degree = 1, intercept = TRUE)
+
+data.frame(bsMat) |>
+  mutate(pos = pos) |>
+  pivot_longer(cols = starts_with("X")) |>
+  ggplot(aes(x = pos, y = value, col = name)) +
+    geom_line() +
+    theme_minimal()
+```
+
+# M-splines
+
+# I-splines
+
+# C-splines
+
+# Periodic splines
+
+# Natural cubic splines
+
+# Generalised Bernstein polynomails

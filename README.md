@@ -33,3 +33,4 @@ pip install pymc3
 * Azure
 * The extent to which linear model theory translates to more complex (e.g. GLMM) settings
 * Bioinformatics! e.g. the BLAST algorithm, De Bruijn graph, sequence assembly
+* Databases

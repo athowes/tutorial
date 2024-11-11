@@ -1,0 +1,46 @@
+# Getting started
+
+Notes on: https://blog.djnavarro.net/posts/2021-11-19_starting-apache-arrow-in-r/
+
+* You don't need to care if you work with small rectangular data
+* Care if
+  1. You have long data
+  2. You might need to work between different languages
+* Arrow is a standardised, language-indep format for storing table-like data in-memory, with a columnar format and supporting zero-copy reads without serialisation overhead
+  * Same thing regardless of the programming language
+  * Table-like: not sure what this means formally but it's like a table
+  * In-memory: not about "on disk" or file formats
+  * Columnar: represents data by columns (unlike CSV which does row-wise) -- this is more efficient for filtering
+  * Zero-copy reads without serialisation overhead: ...
+  
+Interjection, notes on https://blog.djnavarro.net/posts/2021-11-15_serialisation-with-rds/
+
+* The process which takes an object stored in memory and converts it to a stream of bytes that can be written to a file or transmitted elsewhere
+* The in-memory representation of a dataframe is a list of vectors
+
+```{r}
+df <- data.frame(x = rnorm(100), y = rnorm(100))
+write.csv(df, "df.csv")
+
+charToRaw("x")
+charToRaw("x") |> rawToBits()
+
+read_bytes <- function(path, max_bytes = 100) {
+  con <- file(path, open = "rb")
+  bytes <- readBin(con, what = raw(), n = max_bytes)
+  close(con)
+  return(bytes)
+}
+
+read_bytes("df.csv")
+```
+
+* The JSON format (JavaScript Object Notation) https://www.json.org/json-en.html
+* To serialise an R object we need to store the metadata (like classes, names, other attributes)
+
+```{r}
+saveRDS(df, "df.rds")
+read_bytes("df.rds")
+```
+
+* Stopped here: https://blog.djnavarro.net/posts/2021-11-15_serialisation-with-rds/#the-serialize-function

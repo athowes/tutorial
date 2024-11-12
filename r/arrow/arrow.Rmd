@@ -41,6 +41,52 @@ read_bytes("df.csv")
 ```{r}
 saveRDS(df, "df.rds")
 read_bytes("df.rds")
+
+# Not the same as
+bytes <- serialize(df, connection = NULL)
+bytes[1:100]
 ```
 
-* Stopped here: https://blog.djnavarro.net/posts/2021-11-15_serialisation-with-rds/#the-serialize-function
+* `saveRDS` uses gzip compression, while `serialize` doesn't use any form of compression
+
+```{r}
+saveRDS(df, file = "df_nozip.rds", compress = FALSE)
+read_bytes("df_nozip.rds")
+```
+
+```{r}
+unserialize(bytes)
+```
+
+```{r}
+bytes <- serialize(
+  object = c(10.1, 2.2, 94.3),
+  connection = NULL,
+  ascii = TRUE
+)
+
+bytes
+
+bytes |> rawToChar() |> cat()
+
+saveRDS(
+  object = c(10.1, 2.2, 94.3),
+  file = "numbers.rds",
+  ascii = TRUE,
+  compress = FALSE
+)
+
+show_rds <- function(object, header = TRUE) {
+  rds <- object |>
+    serialize(connection = NULL, ascii = TRUE) |>
+    rawToChar() |>
+    strsplit(split = "\n") |>
+    unlist()
+  if(header == FALSE) rds <- rds[-(1:6)]
+  cat(rds, sep = "\n")
+}
+
+show_rds(object = c(10.1, 2.2, 94.3))
+show_rds(object = c(TRUE, TRUE, FALSE, NA), header = FALSE)
+show_rds(object = c(10.3, 99.9, 100), header = FALSE)
+```

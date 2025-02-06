@@ -161,11 +161,15 @@ writeLines(
     // Priors
     mu ~ normal(1, 1);
     sigma ~ normal(0.5, 0.5);
+    
+    array[2] real params;
+    params[1] = mu;
+    params[2] = sigma;
 
     // Likelihood
     for (i in 1:N) {
       target += n[i] * primarycensored_lpmf(
-        y[i] | 1, {mu, sigma},
+        y[i] | 1, params,
         pwindow[i], y_upper[i], D[i],
         1, primary_params
       );
